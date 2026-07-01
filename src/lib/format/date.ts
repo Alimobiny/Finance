@@ -1,7 +1,8 @@
 import { toJalaali, jalaaliWeek } from 'jalaali-js'
 import { toPersianDigits } from './number'
 
-const WEEKDAYS_FA = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنج‌شنبه', 'جمعه']
+/** نام روزهای هفته با مبنای شنبه=۰ */
+export const WEEKDAYS_FA = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنج‌شنبه', 'جمعه']
 
 /** نام روز هفته به فارسی (هفته از شنبه شروع می‌شود، برخلاف getDay() جاوااسکریپت که یکشنبه=۰ است) */
 export function faWeekdayName(date: Date): string {

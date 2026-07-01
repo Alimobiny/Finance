@@ -2,6 +2,7 @@ import type { ComponentType } from 'react'
 import { AppHeader } from './AppHeader'
 import type { ScreenId } from './router'
 import { useUIStore } from '../store/uiStore'
+import { UndoToast } from '../components/ui/UndoToast'
 import { DashboardScreen } from '../features/dashboard/DashboardScreen'
 import { PortfolioScreen } from '../features/portfolio/PortfolioScreen'
 import { TradingScreen } from '../features/trading/TradingScreen'
@@ -37,6 +38,7 @@ function App() {
       <main style={{ maxWidth: 1120, margin: '0 auto', padding: '22px 20px 90px' }}>
         <ActiveScreen />
       </main>
+      <UndoToast />
     </div>
   )
 }

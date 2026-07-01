@@ -20,3 +20,8 @@ export function removeTextItem(list: Draft<TextListItem[]>, id: string): void {
   const idx = list.findIndex((i) => i.id === id)
   if (idx !== -1) list.splice(idx, 1)
 }
+
+/** بازگرداندن آیتم حذف‌شده به همان جایگاه قبلی (برای Undo Toast) */
+export function insertTextItem(list: Draft<TextListItem[]>, item: TextListItem, index: number): void {
+  list.splice(Math.min(Math.max(index, 0), list.length), 0, item)
+}

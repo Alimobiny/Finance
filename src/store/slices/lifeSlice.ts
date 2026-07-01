@@ -1,8 +1,8 @@
 import type { StateCreator } from 'zustand'
 import type { RootStore, Mutators } from '../rootStoreType'
 import { newId } from '../../lib/format/id'
-import { addTextItem, removeTextItem, updateTextItem } from '../listHelpers'
-import type { DayPeriod, LifeState } from '../../types'
+import { addTextItem, insertTextItem, removeTextItem, updateTextItem } from '../listHelpers'
+import type { DayPeriod, LifeState, TextListItem, TimeAnchor } from '../../types'
 
 export interface LifeSlice {
   life: LifeState
@@ -10,6 +10,7 @@ export interface LifeSlice {
   addAnchor: (period: DayPeriod) => void
   updateAnchor: (id: string, patch: { name?: string; note?: string; time?: string; period?: DayPeriod }) => void
   removeAnchor: (id: string) => void
+  restoreAnchor: (item: TimeAnchor, index: number) => void
   toggleAnchorWeekday: (id: string, weekday: number) => void
   toggleAnchorDone: (id: string, weekday: number) => void
   resetWeek: (weekKey: string) => void
@@ -17,6 +18,7 @@ export interface LifeSlice {
   addExecutionRule: () => void
   updateExecutionRule: (id: string, text: string) => void
   removeExecutionRule: (id: string) => void
+  restoreExecutionRule: (item: TextListItem, index: number) => void
 }
 
 export const createLifeSlice = (initial: LifeState): StateCreator<RootStore, Mutators, [], LifeSlice> => (set) => ({
@@ -34,6 +36,10 @@ export const createLifeSlice = (initial: LifeState): StateCreator<RootStore, Mut
   removeAnchor: (id) =>
     set((s) => {
       s.life.anchors = s.life.anchors.filter((a) => a.id !== id)
+    }),
+  restoreAnchor: (item, index) =>
+    set((s) => {
+      s.life.anchors.splice(Math.min(index, s.life.anchors.length), 0, item)
     }),
   toggleAnchorWeekday: (id, weekday) =>
     set((s) => {
@@ -67,5 +73,9 @@ export const createLifeSlice = (initial: LifeState): StateCreator<RootStore, Mut
   removeExecutionRule: (id) =>
     set((s) => {
       removeTextItem(s.life.executionRules, id)
+    }),
+  restoreExecutionRule: (item, index) =>
+    set((s) => {
+      insertTextItem(s.life.executionRules, item, index)
     }),
 })

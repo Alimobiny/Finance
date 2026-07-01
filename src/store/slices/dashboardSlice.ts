@@ -1,7 +1,7 @@
 import type { StateCreator } from 'zustand'
 import type { RootStore, Mutators } from '../rootStoreType'
-import { addTextItem, removeTextItem, updateTextItem } from '../listHelpers'
-import type { DashboardState } from '../../types'
+import { addTextItem, insertTextItem, removeTextItem, updateTextItem } from '../listHelpers'
+import type { DashboardState, TextListItem } from '../../types'
 
 export interface DashboardSlice {
   dashboard: DashboardState
@@ -10,12 +10,18 @@ export interface DashboardSlice {
   addGoal: () => void
   updateGoal: (id: string, text: string) => void
   removeGoal: (id: string) => void
+  restoreGoal: (item: TextListItem, index: number) => void
+
   addIronRule: () => void
   updateIronRule: (id: string, text: string) => void
   removeIronRule: (id: string) => void
+  restoreIronRule: (item: TextListItem, index: number) => void
+
   addRedLine: () => void
   updateRedLine: (id: string, text: string) => void
   removeRedLine: (id: string) => void
+  restoreRedLine: (item: TextListItem, index: number) => void
+
   setGoldenRule: (value: string) => void
   setMarketPulse: (value: string) => void
   setTacticalPulse: (value: string) => void
@@ -42,6 +48,11 @@ export const createDashboardSlice = (
     set((s) => {
       removeTextItem(s.dashboard.goals, id)
     }),
+  restoreGoal: (item, index) =>
+    set((s) => {
+      insertTextItem(s.dashboard.goals, item, index)
+    }),
+
   addIronRule: () =>
     set((s) => {
       addTextItem(s.dashboard.ironRules)
@@ -54,6 +65,11 @@ export const createDashboardSlice = (
     set((s) => {
       removeTextItem(s.dashboard.ironRules, id)
     }),
+  restoreIronRule: (item, index) =>
+    set((s) => {
+      insertTextItem(s.dashboard.ironRules, item, index)
+    }),
+
   addRedLine: () =>
     set((s) => {
       addTextItem(s.dashboard.redLines)
@@ -66,6 +82,11 @@ export const createDashboardSlice = (
     set((s) => {
       removeTextItem(s.dashboard.redLines, id)
     }),
+  restoreRedLine: (item, index) =>
+    set((s) => {
+      insertTextItem(s.dashboard.redLines, item, index)
+    }),
+
   setGoldenRule: (value) =>
     set((s) => {
       s.dashboard.goldenRule = value

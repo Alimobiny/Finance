@@ -1,7 +1,7 @@
 import type { StateCreator } from 'zustand'
 import type { RootStore, Mutators } from '../rootStoreType'
 import { newId } from '../../lib/format/id'
-import type { Debt, MoneyState, TaxInputs } from '../../types'
+import type { Debt, LineItem, MoneyState, TaxInputs } from '../../types'
 
 export interface MoneySlice {
   money: MoneyState
@@ -12,10 +12,12 @@ export interface MoneySlice {
   addIncome: () => void
   updateIncome: (id: string, patch: { label?: string; value?: number }) => void
   removeIncome: (id: string) => void
+  restoreIncome: (item: LineItem, index: number) => void
 
   addExpense: () => void
   updateExpense: (id: string, patch: { label?: string; value?: number }) => void
   removeExpense: (id: string) => void
+  restoreExpense: (item: LineItem, index: number) => void
 
   addDebt: (kind: Debt['kind']) => void
   updateDebt: (id: string, patch: Record<string, unknown>) => void
@@ -23,6 +25,7 @@ export interface MoneySlice {
   payInstallment: (id: string) => void
   unpayInstallment: (id: string) => void
   removeDebt: (id: string) => void
+  restoreDebt: (item: Debt, index: number) => void
 
   setDebtMonthlyCommitment: (value: number) => void
   setTax: (patch: Partial<TaxInputs>) => void
@@ -53,6 +56,10 @@ export const createMoneySlice = (initial: MoneyState): StateCreator<RootStore, M
     set((s) => {
       s.money.income = s.money.income.filter((x) => x.id !== id)
     }),
+  restoreIncome: (item, index) =>
+    set((s) => {
+      s.money.income.splice(Math.min(index, s.money.income.length), 0, item)
+    }),
 
   addExpense: () =>
     set((s) => {
@@ -66,6 +73,10 @@ export const createMoneySlice = (initial: MoneyState): StateCreator<RootStore, M
   removeExpense: (id) =>
     set((s) => {
       s.money.expenses = s.money.expenses.filter((x) => x.id !== id)
+    }),
+  restoreExpense: (item, index) =>
+    set((s) => {
+      s.money.expenses.splice(Math.min(index, s.money.expenses.length), 0, item)
     }),
 
   addDebt: (kind) =>
@@ -101,6 +112,10 @@ export const createMoneySlice = (initial: MoneyState): StateCreator<RootStore, M
   removeDebt: (id) =>
     set((s) => {
       s.money.debts = s.money.debts.filter((x) => x.id !== id)
+    }),
+  restoreDebt: (item, index) =>
+    set((s) => {
+      s.money.debts.splice(Math.min(index, s.money.debts.length), 0, item)
     }),
 
   setDebtMonthlyCommitment: (value) =>
