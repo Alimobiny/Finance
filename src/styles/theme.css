@@ -1,0 +1,110 @@
+/* پالت رنگ و متغیرهای طراحی قطب‌نما — برگرفته از طراحی نسخهٔ اولیه */
+:root {
+  --bg: #f3f1ec;
+  --surface: #ffffff;
+  --surface-muted: #faf8f4;
+  --border: #e7e2d8;
+  --border-strong: #d6d0c4;
+
+  --text: #20201d;
+  --text-muted: #6a6557;
+  --text-faint: #897f70;
+  --text-quiet: #a39a88;
+
+  --accent-blue: #1a5276;
+  --accent-blue-dark: #1f2d4d;
+  --accent-navy: #2c3e66;
+  --accent-gold: #b0832b;
+  --accent-gold-dark: #9a6b1e;
+  --accent-green: #1e6f4c;
+  --accent-green-soft: #eaf2ee;
+  --accent-red: #8c3a3a;
+  --accent-red-soft: #fbeee8;
+  --accent-red-strong: #bb4631;
+  --accent-purple: #5b4b8a;
+  --accent-teal: #2c7a6b;
+
+  --radius-sm: 7px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 16px;
+
+  --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 12px 34px rgba(0, 0, 0, 0.14);
+
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Vazirmatn', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+input,
+button,
+select,
+textarea {
+  font-family: inherit;
+  color: inherit;
+}
+
+button {
+  font: inherit;
+}
+
+::selection {
+  background: #1f567333;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-quiet);
+}
+
+.scrl::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+.scrl::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 6px;
+}
+
+@keyframes fadeUp {
+  from {
+    transform: translateY(7px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@keyframes toastUp {
+  from {
+    transform: translate(-50%, 16px);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+}
