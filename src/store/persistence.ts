@@ -19,7 +19,8 @@ export function loadPersistedState(): RootState | null {
   }
 }
 
-function snapshotToRootState(store: RootStore): RootState {
+/** ساخت اسنپ‌شات همگام با نوع RootState از استور فعلی — هم برای localStorage و هم Drive استفاده می‌شود */
+export function buildSnapshot(store: RootStore): RootState {
   return {
     meta: { updatedAt: new Date().toISOString(), schemaVersion: SCHEMA_VERSION },
     dashboard: store.dashboard,
@@ -33,8 +34,8 @@ function snapshotToRootState(store: RootStore): RootState {
 
 /**
  * روی هر تغییر استور، بعد از یک وقفهٔ کوتاه (debounce) کل وضعیت را در
- * localStorage می‌نویسد. در Milestone بعدی، همین قلاب برای شروع
- * همگام‌سازی debounce‌شده با Google Drive هم استفاده می‌شود.
+ * localStorage می‌نویسد. همگام‌سازی با Google Drive جدا و با debounce
+ * طولانی‌تر در lib/sync/driveSync.ts انجام می‌شود (نگاه کن به startDriveAutoSync).
  */
 export function startLocalPersistence(api: StoreApi<RootStore>): () => void {
   let timer: ReturnType<typeof setTimeout> | null = null
@@ -43,7 +44,7 @@ export function startLocalPersistence(api: StoreApi<RootStore>): () => void {
     if (timer) clearTimeout(timer)
     timer = setTimeout(() => {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshotToRootState(state)))
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(buildSnapshot(state)))
       } catch {
         // localStorage ممکن است پر یا در دسترس نباشد (مثلاً حالت خصوصی مرورگر) — بی‌صدا رد می‌شویم
       }

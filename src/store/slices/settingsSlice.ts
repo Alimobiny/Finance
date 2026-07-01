@@ -1,7 +1,7 @@
 import type { StateCreator } from 'zustand'
 import type { RootStore, Mutators } from '../rootStoreType'
-import { addTextItem, removeTextItem, updateTextItem } from '../listHelpers'
-import type { SettingsState } from '../../types'
+import { addTextItem, insertTextItem, removeTextItem, updateTextItem } from '../listHelpers'
+import type { SettingsState, TextListItem } from '../../types'
 
 export interface SettingsSlice {
   settings: SettingsState
@@ -9,10 +9,12 @@ export interface SettingsSlice {
   addSymbol: () => void
   updateSymbol: (id: string, text: string) => void
   removeSymbol: (id: string) => void
+  restoreSymbol: (item: TextListItem, index: number) => void
 
   addEmotion: () => void
   updateEmotion: (id: string, text: string) => void
   removeEmotion: (id: string) => void
+  restoreEmotion: (item: TextListItem, index: number) => void
 
   setLastSyncedAt: (iso: string | null) => void
 }
@@ -34,6 +36,10 @@ export const createSettingsSlice = (
     set((s) => {
       removeTextItem(s.settings.symbols, id)
     }),
+  restoreSymbol: (item, index) =>
+    set((s) => {
+      insertTextItem(s.settings.symbols, item, index)
+    }),
 
   addEmotion: () =>
     set((s) => {
@@ -46,6 +52,10 @@ export const createSettingsSlice = (
   removeEmotion: (id) =>
     set((s) => {
       removeTextItem(s.settings.emotions, id)
+    }),
+  restoreEmotion: (item, index) =>
+    set((s) => {
+      insertTextItem(s.settings.emotions, item, index)
     }),
 
   setLastSyncedAt: (iso) =>

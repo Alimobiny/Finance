@@ -1,10 +1,24 @@
-import { PlaceholderScreen } from '../../components/ui/PlaceholderScreen'
+import { ScreenHeader } from '../../components/ui/ScreenHeader'
+import { SyncPanel } from './SyncPanel'
+import { BackupPanel } from './BackupPanel'
+import { SymbolsTagsManager } from './SymbolsTagsManager'
 
 export function SettingsScreen() {
   return (
-    <PlaceholderScreen
-      title="تنظیمات و همگام‌سازی"
-      subtitle="ورود با گوگل، همگام‌سازی با Google Drive، پشتیبان‌گیری دستی و مدیریت نمادها/احساسات این‌جا خواهند بود."
-    />
+    <section style={{ animation: 'fadeUp .3s ease' }}>
+      <ScreenHeader
+        eyebrow="تنظیمات"
+        eyebrowColor="var(--accent-blue)"
+        title="پشتیبان‌گیری، بازیابی و همگام‌سازی"
+        subtitle="همهٔ داده‌ها روی همین دستگاه و در فرآیند همگام‌سازی روی Google Drive شخصی‌ات ذخیره می‌شوند. هیچ سروری بین شما و گوگل نیست."
+      />
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(290px,1fr))', gap: 14, marginBottom: 14 }}>
+        <BackupPanel />
+        <SyncPanel />
+      </div>
+
+      <SymbolsTagsManager />
+    </section>
   )
 }
