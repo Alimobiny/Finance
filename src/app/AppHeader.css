@@ -14,6 +14,17 @@
   display: flex;
   align-items: center;
   gap: 14px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 480px) {
+  .headerRow {
+    gap: 10px;
+  }
+  .brandSubtitle,
+  .todayBox {
+    display: none;
+  }
 }
 
 .brand {

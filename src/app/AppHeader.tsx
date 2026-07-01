@@ -1,4 +1,5 @@
 import { CompassLogo } from './CompassLogo'
+import { SyncStatusDot } from './SyncStatusDot'
 import { SCREEN_IDS, SCREEN_LABELS, type ScreenId } from './router'
 import { todayLabel } from '../lib/format/date'
 import './AppHeader.css'
@@ -24,6 +25,7 @@ export function AppHeader({ activeScreen, onNavigate, editMode, onToggleEdit }: 
           </div>
         </div>
         <div className="spacer" />
+        <SyncStatusDot />
         <button className="editBtn" data-active={editMode} onClick={onToggleEdit} type="button">
           <span>✎</span>
           {editMode ? 'پایان ویرایش' : 'حالت ویرایش'}
