@@ -11,6 +11,7 @@ export interface PortfolioSlice {
   addHolding: () => void
   updateHolding: (id: string, patch: Partial<Pick<Holding, 'name' | 'layer' | 'role' | 'target'>>) => void
   removeHolding: (id: string) => void
+  restoreHolding: (item: Holding, index: number) => void
   addManualSub: (holdingId: string) => void
   addLinkedSub: (holdingId: string) => void
   updateSubName: (holdingId: string, subId: string, name: string) => void
@@ -18,6 +19,7 @@ export interface PortfolioSlice {
   updateSubQty: (holdingId: string, subId: string, qty: number) => void
   updateSubUnit: (holdingId: string, subId: string, unit: PriceKey) => void
   removeSub: (holdingId: string, subId: string) => void
+  restoreSub: (holdingId: string, item: HoldingSub, index: number) => void
   setPrice: (key: PriceKey, value: number) => void
   markPricesApplied: () => void
 }
@@ -40,6 +42,10 @@ export const createPortfolioSlice = (
   removeHolding: (id) =>
     set((s) => {
       s.portfolio.holdings = s.portfolio.holdings.filter((h) => h.id !== id)
+    }),
+  restoreHolding: (item, index) =>
+    set((s) => {
+      s.portfolio.holdings.splice(Math.min(index, s.portfolio.holdings.length), 0, item)
     }),
   addManualSub: (holdingId) =>
     set((s) => {
@@ -75,6 +81,11 @@ export const createPortfolioSlice = (
     set((s) => {
       const h = s.portfolio.holdings.find((x) => x.id === holdingId)
       if (h) h.subs = h.subs.filter((sub) => sub.id !== subId)
+    }),
+  restoreSub: (holdingId, item, index) =>
+    set((s) => {
+      const h = s.portfolio.holdings.find((x) => x.id === holdingId)
+      if (h) h.subs.splice(Math.min(index, h.subs.length), 0, item)
     }),
   setPrice: (key, value) =>
     set((s) => {
