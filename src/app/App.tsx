@@ -1,6 +1,7 @@
-import { useState, type ComponentType } from 'react'
+import type { ComponentType } from 'react'
 import { AppHeader } from './AppHeader'
-import { SCREEN_IDS, type ScreenId } from './router'
+import type { ScreenId } from './router'
+import { useUIStore } from '../store/uiStore'
 import { DashboardScreen } from '../features/dashboard/DashboardScreen'
 import { PortfolioScreen } from '../features/portfolio/PortfolioScreen'
 import { TradingScreen } from '../features/trading/TradingScreen'
@@ -18,9 +19,10 @@ const SCREENS: Record<ScreenId, ComponentType> = {
 }
 
 function App() {
-  // TODO(Milestone 2): این دو state به uiSlice در Zustand store منتقل می‌شوند
-  const [activeScreen, setActiveScreen] = useState<ScreenId>(SCREEN_IDS[0])
-  const [editMode, setEditMode] = useState(false)
+  const activeScreen = useUIStore((s) => s.activeScreen)
+  const setActiveScreen = useUIStore((s) => s.setActiveScreen)
+  const editMode = useUIStore((s) => s.editMode)
+  const toggleEditMode = useUIStore((s) => s.toggleEditMode)
 
   const ActiveScreen = SCREENS[activeScreen]
 
@@ -30,7 +32,7 @@ function App() {
         activeScreen={activeScreen}
         onNavigate={setActiveScreen}
         editMode={editMode}
-        onToggleEdit={() => setEditMode((v) => !v)}
+        onToggleEdit={toggleEditMode}
       />
       <main style={{ maxWidth: 1120, margin: '0 auto', padding: '22px 20px 90px' }}>
         <ActiveScreen />

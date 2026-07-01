@@ -10,6 +10,11 @@ import '@fontsource/vazirmatn/800.css'
 
 import './index.css'
 import App from './app/App.tsx'
+import { useRootStore } from './store/rootStore'
+import { startLocalPersistence } from './store/persistence'
+
+// اشتراک در تغییرات استور برای ذخیرهٔ خودکار در localStorage (debounce شده)
+startLocalPersistence(useRootStore)
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
