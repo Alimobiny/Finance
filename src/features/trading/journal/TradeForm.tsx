@@ -4,12 +4,31 @@ import { resizeImageFile } from '../../../lib/image/resizeImage'
 import type { NewTradeInput } from '../../../store/slices/tradingSlice'
 import type { TradeDirection, TradeOutcome } from '../../../types'
 import { faDateShort } from '../../../lib/format/date'
+import { toLatinDigits } from '../../../lib/format/number'
+import { computePlannedRR, computeRFromPrices, parsePriceInput } from '../lib/tradeMath'
+
+/** متن ورودی «نتیجهٔ R» را به عدد پاک یا null تبدیل می‌کند (هرگز NaN). */
+function parseRInput(raw: string): number | null {
+  const cleaned = toLatinDigits(raw).replace(/[^\d.-]/g, '')
+  if (cleaned === '' || cleaned === '-' || cleaned === '.' || cleaned === '-.') return null
+  const n = Number(cleaned)
+  return Number.isFinite(n) ? n : null
+}
+
+const EMPTY_PRICES = { entry: '', stop: '', tp: '', exit: '' }
+
+const OUTCOME_FROM_R = (r: number): TradeOutcome => (r > 0 ? 'win' : r < 0 ? 'loss' : 'be')
+const OUTCOME_LABEL: Record<TradeOutcome, string> = { '': '—', win: 'برد', loss: 'باخت', be: 'سربه‌سر' }
 
 const EMPTY_FORM: NewTradeInput = {
   date: '',
   symbol: '',
   dir: 'خرید',
   riskPercent: '',
+  entry: null,
+  stop: null,
+  tp: null,
+  exit: null,
   rr: '',
   r: null,
   outcome: '',
@@ -31,6 +50,9 @@ export function TradeForm() {
   const cancelEditTrade = useRootStore((s) => s.cancelEditTrade)
 
   const [form, setForm] = useState<NewTradeInput>(EMPTY_FORM)
+  // متن خام فیلدهای عددی را جدا نگه می‌داریم تا تایپ «-» یا «1.» وسط کار به null تبدیل نشود.
+  const [rText, setRText] = useState('')
+  const [priceText, setPriceText] = useState(EMPTY_PRICES)
   const [imageBusy, setImageBusy] = useState(false)
 
   const editingTrade = editingTradeId ? trades.find((t) => t.id === editingTradeId) : null
@@ -39,8 +61,31 @@ export function TradeForm() {
     if (editingTrade) {
       const { id: _id, ...rest } = editingTrade
       setForm(rest)
+      setRText(rest.r != null && Number.isFinite(rest.r) ? String(rest.r) : '')
+      const num = (v: number | null | undefined) => (v != null && Number.isFinite(v) ? String(v) : '')
+      setPriceText({ entry: num(rest.entry), stop: num(rest.stop), tp: num(rest.tp), exit: num(rest.exit) })
     }
   }, [editingTrade])
+
+  const entryN = parsePriceInput(priceText.entry)
+  const stopN = parsePriceInput(priceText.stop)
+  const tpN = parsePriceInput(priceText.tp)
+  const exitN = parsePriceInput(priceText.exit)
+
+  // اگر قیمت‌ها کامل باشند، R و R:R خودکار و عینی محاسبه می‌شوند و بر ورودی دستی مقدم‌اند.
+  const computedR = computeRFromPrices(form.dir, entryN, stopN, exitN)
+  const computedRR = computePlannedRR(entryN, stopN, tpN)
+  const rFromPrices = computedR != null
+  const rrFromPrices = computedRR != null
+
+  const rNum = computedR ?? parseRInput(rText)
+  const rrValue = rrFromPrices ? String(computedRR) : form.rr
+  const rLocked = rNum != null // وقتی R عدد معتبری است، نتیجه از آن مشتق و قفل می‌شود
+  const shownOutcome: TradeOutcome = rLocked ? OUTCOME_FROM_R(rNum) : form.outcome
+
+  function setPrice(key: keyof typeof EMPTY_PRICES, value: string) {
+    setPriceText((p) => ({ ...p, [key]: value }))
+  }
 
   function set<K extends keyof NewTradeInput>(key: K, value: NewTradeInput[K]) {
     setForm((f) => ({ ...f, [key]: value }))
@@ -60,15 +105,24 @@ export function TradeForm() {
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!form.symbol.trim() && form.r == null && !form.outcome) return
+    if (!form.symbol.trim() && rNum == null && !form.outcome) return
     const payload: NewTradeInput = {
       ...form,
+      entry: entryN,
+      stop: stopN,
+      tp: tpN,
+      exit: exitN,
+      rr: rrValue,
+      r: rNum, // همیشه عدد پاک یا null — هرگز NaN (از قیمت‌ها یا ورودی دستی)
+      outcome: rLocked ? '' : form.outcome, // با R معتبر، نتیجه از R مشتق می‌شود
       date: form.date || faDateShort(new Date()),
       symbol: form.symbol.trim() || 'XAUUSD',
     }
     if (editingTradeId) updateTrade(editingTradeId, payload)
     else addTrade(payload)
     setForm(EMPTY_FORM)
+    setRText('')
+    setPriceText(EMPTY_PRICES)
   }
 
   return (
@@ -96,25 +150,58 @@ export function TradeForm() {
           <Field label="ریسک٪">
             <input value={form.riskPercent} onChange={(e) => set('riskPercent', e.target.value)} placeholder="0.5" inputMode="decimal" style={{ ...inputStyle, direction: 'ltr', textAlign: 'left' }} />
           </Field>
-          <Field label="R:R هدف">
-            <input value={form.rr} onChange={(e) => set('rr', e.target.value)} placeholder="2" inputMode="decimal" style={{ ...inputStyle, direction: 'ltr', textAlign: 'left' }} />
+          <Field label="قیمت ورود">
+            <input value={priceText.entry} onChange={(e) => setPrice('entry', e.target.value)} placeholder="مثلاً 3450" inputMode="decimal" style={{ ...inputStyle, direction: 'ltr', textAlign: 'left' }} />
           </Field>
-          <Field label="نتیجهٔ R">
+          <Field label="حد ضرر (SL)">
+            <input value={priceText.stop} onChange={(e) => setPrice('stop', e.target.value)} placeholder="مثلاً 3440" inputMode="decimal" style={{ ...inputStyle, direction: 'ltr', textAlign: 'left' }} />
+          </Field>
+          <Field label="حد سود (TP)">
+            <input value={priceText.tp} onChange={(e) => setPrice('tp', e.target.value)} placeholder="اختیاری" inputMode="decimal" style={{ ...inputStyle, direction: 'ltr', textAlign: 'left' }} />
+          </Field>
+          <Field label="قیمت خروج">
+            <input value={priceText.exit} onChange={(e) => setPrice('exit', e.target.value)} placeholder="بعد از بستن" inputMode="decimal" style={{ ...inputStyle, direction: 'ltr', textAlign: 'left' }} />
+          </Field>
+          <Field label={rrFromPrices ? 'R:R هدف · خودکار' : 'R:R هدف'}>
             <input
-              value={form.r ?? ''}
-              onChange={(e) => set('r', e.target.value === '' ? null : Number(e.target.value))}
+              value={rrValue}
+              onChange={(e) => set('rr', e.target.value)}
+              readOnly={rrFromPrices}
+              placeholder="2"
+              inputMode="decimal"
+              title={rrFromPrices ? 'از ورود/حدضرر/حدسود حساب شد' : undefined}
+              style={{ ...inputStyle, direction: 'ltr', textAlign: 'left', ...(rrFromPrices ? lockedStyle : null) }}
+            />
+          </Field>
+          <Field label={rFromPrices ? 'نتیجهٔ R · خودکار' : 'نتیجهٔ R'}>
+            <input
+              value={rFromPrices ? String(computedR) : rText}
+              onChange={(e) => setRText(e.target.value)}
+              readOnly={rFromPrices}
               placeholder="مثلاً 2 یا -1"
               inputMode="decimal"
-              style={{ ...inputStyle, direction: 'ltr', textAlign: 'left' }}
+              title={rFromPrices ? 'از ورود/حدضرر/خروج حساب شد' : undefined}
+              style={{ ...inputStyle, direction: 'ltr', textAlign: 'left', ...(rFromPrices ? lockedStyle : null) }}
             />
           </Field>
           <Field label="نتیجه">
-            <select value={form.outcome} onChange={(e) => set('outcome', e.target.value as TradeOutcome)} style={inputStyle}>
-              <option value="">خودکار (از R)</option>
-              <option value="win">برد</option>
-              <option value="loss">باخت</option>
-              <option value="be">سربه‌سر</option>
-            </select>
+            {rLocked ? (
+              // با R معتبر، نتیجه از علامت R مشتق و قفل می‌شود تا تناقض «باخت با R مثبت» رخ ندهد.
+              <div
+                title="نتیجه از «نتیجهٔ R» گرفته می‌شود؛ برای تغییر، مقدار R را ویرایش کن."
+                style={{ ...inputStyle, display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-muted)', cursor: 'not-allowed' }}
+              >
+                <span>{OUTCOME_LABEL[shownOutcome]}</span>
+                <span style={{ fontSize: 10, color: 'var(--text-quiet)' }}>· خودکار از R</span>
+              </div>
+            ) : (
+              <select value={form.outcome} onChange={(e) => set('outcome', e.target.value as TradeOutcome)} style={inputStyle}>
+                <option value="">— (R را وارد کن)</option>
+                <option value="win">برد</option>
+                <option value="loss">باخت</option>
+                <option value="be">سربه‌سر</option>
+              </select>
+            )}
           </Field>
           <Field label="چک‌لیست کامل؟">
             <select value={form.checklistFollowed ? 'yes' : 'no'} onChange={(e) => set('checklistFollowed', e.target.value === 'yes')} style={inputStyle}>
@@ -138,6 +225,10 @@ export function TradeForm() {
               ))}
             </select>
           </Field>
+        </div>
+
+        <div style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 9, lineHeight: 1.6 }}>
+          اگر «ورود»، «حد ضرر» و «خروج» را وارد کنی، <b style={{ color: 'var(--accent-green)' }}>نتیجهٔ R و R:R خودکار و دقیق</b> محاسبه می‌شوند و دیگر خطای دستی ممکن نیست. در غیر این‌صورت می‌توانی همان R را دستی وارد کنی.
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 10 }}>
@@ -188,6 +279,8 @@ export function TradeForm() {
               onClick={() => {
                 cancelEditTrade()
                 setForm(EMPTY_FORM)
+                setRText('')
+                setPriceText(EMPTY_PRICES)
               }}
               style={{ border: '1px solid var(--border)', background: 'var(--surface)', cursor: 'pointer', borderRadius: 10, padding: '10px 18px', fontSize: 13, fontWeight: 600, color: 'var(--text-muted)' }}
             >
@@ -209,6 +302,15 @@ const inputStyle: React.CSSProperties = {
   fontSize: 12.5,
   background: 'var(--surface-muted)',
   outline: 'none',
+}
+
+// ظاهر فیلدهای «قفل‌شده» که مقدارشان خودکار از قیمت‌ها می‌آید.
+const lockedStyle: React.CSSProperties = {
+  background: 'var(--accent-green-soft)',
+  borderColor: 'transparent',
+  color: 'var(--accent-green)',
+  fontWeight: 700,
+  cursor: 'not-allowed',
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {

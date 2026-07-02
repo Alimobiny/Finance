@@ -59,6 +59,11 @@ export interface Trade {
   symbol: string
   dir: TradeDirection
   riskPercent: string
+  /** قیمت‌های ورود/حدضرر/حدسود/خروج — اگر پر شوند، R و R:R خودکار و عینی محاسبه می‌شوند */
+  entry: number | null
+  stop: number | null
+  tp: number | null
+  exit: number | null
   rr: string
   r: number | null
   outcome: TradeOutcome

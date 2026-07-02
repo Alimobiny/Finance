@@ -1,6 +1,6 @@
 import { useRootStore } from '../../../store/rootStore'
 import { useSoftDelete } from '../../../lib/useSoftDelete'
-import type { Trade, TradeOutcome } from '../../../types'
+import { hasR, resolveOutcome } from '../lib/tradeOutcome'
 
 const OUTCOME_LABEL: Record<string, string> = { win: 'برد', loss: 'باخت', be: 'سربه‌سر', '': '—' }
 const OUTCOME_STYLE: Record<string, { bg: string; color: string }> = {
@@ -8,12 +8,6 @@ const OUTCOME_STYLE: Record<string, { bg: string; color: string }> = {
   loss: { bg: 'var(--accent-red-soft)', color: 'var(--accent-red-strong)' },
   be: { bg: '#F1F4F9', color: 'var(--accent-navy)' },
   '': { bg: '#F4F2EC', color: 'var(--text-quiet)' },
-}
-
-function resolveOutcome(t: Trade): TradeOutcome {
-  if (t.outcome) return t.outcome
-  if (t.r == null) return ''
-  return t.r > 0 ? 'win' : t.r < 0 ? 'loss' : ''
 }
 
 function viewShot(src: string) {
@@ -56,8 +50,8 @@ export function TradesTable() {
                 </td>
                 <td style={{ padding: '10px 12px' }}>{t.riskPercent ? `${t.riskPercent}٪` : '—'}</td>
                 <td style={{ padding: '10px 12px' }}>{t.rr || '—'}</td>
-                <td style={{ padding: '10px 12px', fontWeight: 800, color: t.r == null ? 'var(--text-quiet)' : t.r > 0 ? 'var(--accent-green)' : t.r < 0 ? 'var(--accent-red-strong)' : 'var(--text)' }}>
-                  {t.r == null ? '—' : `${t.r > 0 ? '+' : ''}${t.r}`}
+                <td style={{ padding: '10px 12px', fontWeight: 800, color: !hasR(t) ? 'var(--text-quiet)' : t.r! > 0 ? 'var(--accent-green)' : t.r! < 0 ? 'var(--accent-red-strong)' : 'var(--text)' }}>
+                  {!hasR(t) ? '—' : `${t.r! > 0 ? '+' : ''}${t.r}`}
                 </td>
                 <td style={{ padding: '10px 12px', color: t.checklistFollowed ? 'var(--accent-green)' : 'var(--accent-red-strong)', fontWeight: 600 }}>{t.checklistFollowed ? 'بله' : 'خیر'}</td>
                 <td style={{ padding: '10px 12px', color: t.rule1Followed ? 'var(--accent-green)' : 'var(--accent-red-strong)', fontWeight: 600 }}>{t.rule1Followed ? 'بله' : 'خیر'}</td>

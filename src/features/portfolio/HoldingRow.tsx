@@ -3,7 +3,9 @@ import { useRootStore } from '../../store/rootStore'
 import { useUIStore } from '../../store/uiStore'
 import { useSoftDelete } from '../../lib/useSoftDelete'
 import { NumberField } from '../../components/ui/NumberField'
+import { AssetDonut } from '../../components/ui/AssetDonut'
 import { faMoney, faPercent } from '../../lib/format/number'
+import { tintPalette } from '../../lib/color'
 import { holdingRowStats } from './lib/portfolioAnalytics'
 import { subValue } from './lib/computeHoldingValue'
 import type { Holding, PriceKey } from '../../types'
@@ -36,6 +38,7 @@ export function HoldingRow({ holding, index, portfolio }: { holding: Holding; in
 
   const stats = holdingRowStats(holding, portfolio)
   const statusStyle = STATUS_STYLE[stats.status]
+  const subColors = tintPalette(holding.color, holding.subs.length)
 
   return (
     <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 13, padding: '15px 16px' }}>
@@ -104,6 +107,21 @@ export function HoldingRow({ holding, index, portfolio }: { holding: Holding; in
 
       {expanded && (
         <div style={{ marginTop: 13, paddingTop: 13, borderTop: '1px dashed var(--border)', display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {holding.subs.length > 0 && (
+            <div style={{ marginBottom: 4 }}>
+              <div style={{ fontSize: 11.5, color: 'var(--text-faint)', fontWeight: 600, marginBottom: 9 }}>ترکیب «{holding.name}»</div>
+              <AssetDonut
+                size={120}
+                thickness={17}
+                slices={holding.subs.map((sub, i) => ({
+                  label: sub.name,
+                  value: subValue(sub, portfolio.prices),
+                  color: subColors[i],
+                }))}
+                emptyHint="برای دیدن نمودار، ارزش زیرمجموعه‌ها را وارد کن."
+              />
+            </div>
+          )}
           {holding.subs.map((sub, subIndex) => (
             <div key={sub.id} style={{ background: 'var(--surface-muted)', borderRadius: 10, padding: '9px 12px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>

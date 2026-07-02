@@ -1,5 +1,6 @@
 import type { Trade } from '../../../types'
 import { faNumber } from '../../../lib/format/number'
+import { hasR } from '../lib/tradeOutcome'
 
 const W = 320
 const H = 90
@@ -7,10 +8,10 @@ const PAD = 6
 
 function buildPath(trades: Trade[]) {
   const rValues = trades
-    .filter((t) => t.r != null)
+    .filter(hasR)
     .slice()
     .reverse() // معاملات جدید در ابتدای آرایه‌اند؛ منحنی باید زمانی (قدیم→جدید) باشد
-    .map((t) => t.r as number)
+    .map((t) => t.r)
   if (rValues.length === 0) return null
 
   const points: { i: number; cum: number }[] = []

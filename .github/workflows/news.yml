@@ -1,0 +1,40 @@
+name: Update news
+
+on:
+  schedule:
+    # روزی یک‌بار، حدود ۸ صبح تهران (۰۴:۳۰ UTC).
+    - cron: '30 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  models: read # برای استفادهٔ رایگان از GitHub Models
+
+concurrency:
+  group: update-news
+  cancel-in-progress: true
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node scripts/fetch-news.mjs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # یوزرنیم کانال عمومی تلگرام را در Settings → Secrets and variables → Actions → Variables بگذار
+          TELEGRAM_CHANNEL: ${{ vars.TELEGRAM_CHANNEL }}
+      - name: Commit if changed
+        run: |
+          if [[ -n "$(git status --porcelain public/news.json)" ]]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add public/news.json
+            git commit -m "chore(news): به‌روزرسانی خودکار خلاصهٔ اخبار"
+            git push
+          else
+            echo "بدون تغییر."
+          fi

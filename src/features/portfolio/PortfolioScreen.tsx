@@ -4,8 +4,9 @@ import { ScreenHeader } from '../../components/ui/ScreenHeader'
 import { Card } from '../../components/ui/Card'
 import { HoldingRow } from './HoldingRow'
 import { PricePanel } from './PricePanel'
+import { AssetDonut } from '../../components/ui/AssetDonut'
 import { faMoney, faPercent } from '../../lib/format/number'
-import { portfolioTotal } from './lib/computeHoldingValue'
+import { holdingValue, portfolioTotal } from './lib/computeHoldingValue'
 import { biggestDeviationLabel, defensivePercent, rebalanceSuggestions, targetSum } from './lib/portfolioAnalytics'
 
 export function PortfolioScreen() {
@@ -50,11 +51,19 @@ export function PortfolioScreen() {
       </div>
 
       {total > 0 && (
-        <div style={{ height: 15, borderRadius: 10, overflow: 'hidden', display: 'flex', border: '1px solid var(--border)', background: 'var(--surface)', marginBottom: 18 }}>
+        <div style={{ height: 15, borderRadius: 10, overflow: 'hidden', display: 'flex', border: '1px solid var(--border)', background: 'var(--surface)', marginBottom: 16 }}>
           {portfolio.holdings.map((h) => (
-            <div key={h.id} title={h.name} style={{ width: `${(h.subs.reduce((s2, sub) => s2 + (sub.kind === 'manual' ? sub.value : sub.qty * (portfolio.prices[sub.unit] || 0)), 0) / total) * 100}%`, background: h.color }} />
+            <div key={h.id} title={h.name} style={{ width: `${(holdingValue(h, portfolio.prices) / total) * 100}%`, background: h.color }} />
           ))}
         </div>
+      )}
+
+      {total > 0 && (
+        <Card title="▪ ترکیب کل دارایی‌ها" style={{ marginBottom: 16 }}>
+          <AssetDonut
+            slices={portfolio.holdings.map((h) => ({ label: h.name, value: holdingValue(h, portfolio.prices), color: h.color }))}
+          />
+        </Card>
       )}
 
       <PricePanel />
