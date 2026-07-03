@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useRootStore } from '../../../store/rootStore'
-import { parseMt5Html, type ParsedTrade } from '../lib/importMt5'
+import { faMoney } from '../../../lib/format/number'
+import { decodeReport, parseMt5Html, type ParsedTrade } from '../lib/importMt5'
 
 type Stage =
   | { kind: 'idle' }
@@ -12,6 +13,9 @@ const OUTCOME_LABEL: Record<string, string> = { win: 'برد', loss: 'باخت',
 
 export function ImportPanel() {
   const importTrades = useRootStore((s) => s.importTrades)
+  const accounts = useRootStore((s) => s.trading.accounts)
+  const activeAccountId = useRootStore((s) => s.trading.activeAccountId)
+  const activeAccount = accounts.find((a) => a.id === activeAccountId)
   const [open, setOpen] = useState(false)
   const [stage, setStage] = useState<Stage>({ kind: 'idle' })
 
@@ -20,7 +24,8 @@ export function ImportPanel() {
     e.target.value = '' // تا انتخاب دوبارهٔ همان فایل هم کار کند
     if (!file) return
     try {
-      const text = await file.text()
+      const buffer = await file.arrayBuffer()
+      const text = decodeReport(buffer) // فایل متاتریدر معمولاً UTF-16 است
       const { trades, skipped } = parseMt5Html(text)
       if (trades.length === 0) {
         setStage({ kind: 'error', msg: 'هیچ معاملهٔ بسته‌شده‌ای در فایل پیدا نشد. مطمئن شو از MT5 مسیر History → کلیک راست → Report (خروجی HTML) گرفته‌ای.' })
@@ -51,6 +56,18 @@ export function ImportPanel() {
           <div style={{ fontSize: 11.5, color: 'var(--text-faint)', lineHeight: 1.7, marginBottom: 11 }}>
             در MT5: پنل <b>Toolbox</b> → تب <b>History</b> → کلیک راست → <b>Report</b> → ذخیره به‌صورت HTML. سپس همان فایل را این‌جا انتخاب کن. معاملات تکراری (بر اساس شمارهٔ پوزیشن) دوباره اضافه نمی‌شوند.
           </div>
+          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 11, background: 'var(--surface-muted)', borderRadius: 9, padding: '8px 11px', lineHeight: 1.6 }}>
+            معاملات به حساب <b>«{activeAccount?.name}»</b> اضافه می‌شوند.{' '}
+            {activeAccount && activeAccount.riskPerTrade > 0 ? (
+              <>
+                نتیجهٔ R = سود ÷ <b>{faMoney(activeAccount.riskPerTrade)}</b> (مبلغ ریسک هر معامله).
+              </>
+            ) : (
+              <b style={{ color: 'var(--accent-gold-dark)' }}>
+                برای محاسبهٔ R، اول «مبلغ ریسک هر معامله» این حساب را در بالای همین صفحه تنظیم کن.
+              </b>
+            )}
+          </div>
 
           <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer', border: '1px dashed var(--border-strong)', background: 'var(--surface-muted)', borderRadius: 9, padding: '9px 14px', fontSize: 12.5, fontWeight: 600, color: 'var(--text-muted)' }}>
             📄 انتخاب فایل گزارش (HTML)
@@ -68,10 +85,10 @@ export function ImportPanel() {
                 {stage.skipped > 0 && <span style={{ color: 'var(--text-quiet)' }}> · {toFa(stage.skipped)} ردیف نامفهوم رد شد</span>}. پیش‌نمایش:
               </div>
               <div className="scrl" style={{ overflowX: 'auto', border: '1px solid var(--border)', borderRadius: 10 }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11.5, minWidth: 560 }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11.5, minWidth: 520 }}>
                   <thead>
                     <tr style={{ background: 'var(--surface-muted)', textAlign: 'right', color: 'var(--text-faint)' }}>
-                      {['تاریخ', 'نماد', 'جهت', 'ورود', 'حدضرر', 'خروج', 'R', 'نتیجه'].map((h) => (
+                      {['تاریخ', 'نماد', 'جهت', 'ورود', 'خروج', 'سود/زیان ($)', 'نتیجه'].map((h) => (
                         <th key={h} style={{ padding: '7px 9px', fontWeight: 600 }}>{h}</th>
                       ))}
                     </tr>
@@ -83,12 +100,11 @@ export function ImportPanel() {
                         <td style={{ padding: '6px 9px', fontWeight: 600 }}>{t.input.symbol}</td>
                         <td style={{ padding: '6px 9px', color: t.input.dir === 'خرید' ? 'var(--accent-green)' : 'var(--accent-red-strong)' }}>{t.input.dir}</td>
                         <td style={{ padding: '6px 9px', direction: 'ltr' }}>{t.input.entry ?? '—'}</td>
-                        <td style={{ padding: '6px 9px', direction: 'ltr' }}>{t.input.stop ?? '—'}</td>
                         <td style={{ padding: '6px 9px', direction: 'ltr' }}>{t.input.exit ?? '—'}</td>
-                        <td style={{ padding: '6px 9px', direction: 'ltr', fontWeight: 700, color: t.input.r == null ? 'var(--text-quiet)' : t.input.r > 0 ? 'var(--accent-green)' : 'var(--accent-red-strong)' }}>
-                          {t.input.r == null ? '—' : `${t.input.r > 0 ? '+' : ''}${t.input.r}`}
+                        <td style={{ padding: '6px 9px', direction: 'ltr', fontWeight: 700, color: t.profit == null ? 'var(--text-quiet)' : t.profit > 0 ? 'var(--accent-green)' : 'var(--accent-red-strong)' }}>
+                          {t.profit == null ? '—' : `${t.profit > 0 ? '+' : ''}${t.profit}`}
                         </td>
-                        <td style={{ padding: '6px 9px' }}>{OUTCOME_LABEL[t.input.r != null ? (t.input.r > 0 ? 'win' : t.input.r < 0 ? 'loss' : 'be') : t.input.outcome]}</td>
+                        <td style={{ padding: '6px 9px' }}>{OUTCOME_LABEL[t.profit != null ? (t.profit > 0 ? 'win' : t.profit < 0 ? 'loss' : 'be') : t.input.outcome]}</td>
                       </tr>
                     ))}
                   </tbody>

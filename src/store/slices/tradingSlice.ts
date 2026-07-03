@@ -1,12 +1,20 @@
 import type { StateCreator } from 'zustand'
 import type { RootStore, Mutators } from '../rootStoreType'
 import { newId } from '../../lib/format/id'
+import { rFromProfit } from '../../features/trading/lib/tradeMath'
 import type { ChecklistItem, PositionSizeInputs, ScoreOption, Trade, TradingState } from '../../types'
 
-export type NewTradeInput = Omit<Trade, 'id'>
+/** ورودی ثبت معامله؛ حساب به‌صورت خودکار «حساب فعال» می‌شود، پس accountId اینجا نیست. */
+export type NewTradeInput = Omit<Trade, 'id' | 'accountId'>
 
 export interface TradingSlice {
   trading: TradingState
+
+  addAccount: (name?: string) => void
+  renameAccount: (id: string, name: string) => void
+  setAccountRisk: (id: string, riskPerTrade: number) => void
+  removeAccount: (id: string) => void
+  setActiveAccount: (id: string) => void
 
   addTrade: (input: NewTradeInput) => void
   importTrades: (inputs: NewTradeInput[]) => { added: number; skipped: number }
@@ -41,15 +49,53 @@ export const createTradingSlice = (
 ): StateCreator<RootStore, Mutators, [], TradingSlice> => (set) => ({
   trading: initial,
 
+  addAccount: (name) =>
+    set((s) => {
+      const id = newId()
+      s.trading.accounts.push({ id, name: name?.trim() || `حساب ${s.trading.accounts.length + 1}`, riskPerTrade: 0 })
+      s.trading.activeAccountId = id
+    }),
+  renameAccount: (id, name) =>
+    set((s) => {
+      const acc = s.trading.accounts.find((a) => a.id === id)
+      if (acc) acc.name = name
+    }),
+  setAccountRisk: (id, riskPerTrade) =>
+    set((s) => {
+      const acc = s.trading.accounts.find((a) => a.id === id)
+      if (!acc) return
+      acc.riskPerTrade = riskPerTrade
+      // R معاملاتِ وارد‌شدهٔ همین حساب (که سود واقعی دارند) را با ریسک جدید بازمحاسبه کن.
+      for (const t of s.trading.trades) {
+        if (t.accountId === id && t.profit != null) t.r = rFromProfit(t.profit, riskPerTrade)
+      }
+    }),
+  removeAccount: (id) =>
+    set((s) => {
+      if (s.trading.accounts.length <= 1) return // همیشه دست‌کم یک حساب بماند
+      s.trading.accounts = s.trading.accounts.filter((a) => a.id !== id)
+      s.trading.trades = s.trading.trades.filter((t) => t.accountId !== id)
+      if (s.trading.activeAccountId === id) s.trading.activeAccountId = s.trading.accounts[0].id
+    }),
+  setActiveAccount: (id) =>
+    set((s) => {
+      if (s.trading.accounts.some((a) => a.id === id)) s.trading.activeAccountId = id
+    }),
+
   addTrade: (input) =>
     set((s) => {
-      s.trading.trades.unshift({ id: newId(), ...input })
+      s.trading.trades.unshift({ id: newId(), accountId: s.trading.activeAccountId, ...input })
     }),
   importTrades: (inputs) => {
     let added = 0
     let skipped = 0
     set((s) => {
-      const seen = new Set(s.trading.trades.map((t) => t.ticket).filter(Boolean) as string[])
+      const accId = s.trading.activeAccountId
+      const risk = s.trading.accounts.find((a) => a.id === accId)?.riskPerTrade ?? 0
+      // تکراری‌زدایی فقط داخل همین حساب (شمارهٔ پوزیشن بین حساب‌های مختلف می‌تواند تکرار شود).
+      const seen = new Set(
+        s.trading.trades.filter((t) => t.accountId === accId).map((t) => t.ticket).filter(Boolean) as string[],
+      )
       // قدیمی→جدید اضافه می‌کنیم و در ابتدای آرایه می‌گذاریم تا در جدول، جدیدترین بالا بماند.
       for (const input of inputs) {
         if (input.ticket && seen.has(input.ticket)) {
@@ -57,7 +103,9 @@ export const createTradingSlice = (
           continue
         }
         if (input.ticket) seen.add(input.ticket)
-        s.trading.trades.unshift({ id: newId(), ...input })
+        // R از روی سود واقعی ÷ ریسک ثابت حساب (اگر ریسک هنوز صفر باشد، بعداً با تنظیمش پر می‌شود).
+        const r = input.profit != null ? rFromProfit(input.profit, risk) : input.r
+        s.trading.trades.unshift({ id: newId(), accountId: accId, ...input, r })
         added++
       }
     })
@@ -66,7 +114,7 @@ export const createTradingSlice = (
   updateTrade: (id, input) =>
     set((s) => {
       const idx = s.trading.trades.findIndex((t) => t.id === id)
-      if (idx !== -1) s.trading.trades[idx] = { id, ...input }
+      if (idx !== -1) s.trading.trades[idx] = { id, accountId: s.trading.trades[idx].accountId, ...input }
       s.trading.editingTradeId = null
     }),
   removeTrade: (id) =>

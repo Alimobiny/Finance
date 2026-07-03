@@ -6,7 +6,7 @@ import { NumberField } from '../../components/ui/NumberField'
 import { EditableLineItemList } from '../../components/ui/EditableLineItemList'
 import { DebtCard } from './DebtCard'
 import { faMoney, faNumber } from '../../lib/format/number'
-import { computeTax, sumLineItems, totalMonthlyInstallment, totalRemainingDebt } from './lib/moneyCalcs'
+import { sumLineItems, totalMonthlyInstallment, totalRemainingDebt } from './lib/moneyCalcs'
 
 export function MoneyScreen() {
   const editMode = useUIStore((s) => s.editMode)
@@ -26,14 +26,12 @@ export function MoneyScreen() {
   const restoreExpense = useRootStore((s) => s.restoreExpense)
 
   const addDebt = useRootStore((s) => s.addDebt)
-  const setTax = useRootStore((s) => s.setTax)
 
   const incomeTotal = sumLineItems(money.income)
   const expenseTotal = sumLineItems(money.expenses)
   const net = incomeTotal - expenseTotal
   const remainingDebt = totalRemainingDebt(money.debts)
   const monthlyInstallment = totalMonthlyInstallment(money.debts)
-  const tax = computeTax(money.tax)
 
   const efPercent = money.emergencyTarget > 0 ? Math.min((money.emergencyCurrent / money.emergencyTarget) * 100, 100) : 0
 
@@ -124,41 +122,6 @@ export function MoneyScreen() {
             </span>
           </div>
         )}
-      </Card>
-
-      <Card title="برآورد مالیات (اختیاری)">
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', gap: 11 }}>
-          <label style={{ fontSize: 11.5, color: 'var(--text-faint)', fontWeight: 600 }}>
-            کارکرد ناخالص سال
-            <NumberField value={money.tax.gross} onChange={(v) => setTax({ gross: v })} style={{ marginTop: 5 }} />
-          </label>
-          <label style={{ fontSize: 11.5, color: 'var(--text-faint)', fontWeight: 600 }}>
-            کسورات قابل قبول
-            <NumberField value={money.tax.deduct} onChange={(v) => setTax({ deduct: v })} style={{ marginTop: 5 }} />
-          </label>
-          <label style={{ fontSize: 11.5, color: 'var(--text-faint)', fontWeight: 600 }}>
-            معافیت سالانه
-            <NumberField value={money.tax.exempt} onChange={(v) => setTax({ exempt: v })} style={{ marginTop: 5 }} />
-          </label>
-          <label style={{ fontSize: 11.5, color: 'var(--text-faint)', fontWeight: 600 }}>
-            نرخ مؤثر (٪)
-            <NumberField value={money.tax.rate} onChange={(v) => setTax({ rate: v })} style={{ marginTop: 5 }} decimals={1} />
-          </label>
-        </div>
-        <div style={{ display: 'flex', gap: 11, marginTop: 15, flexWrap: 'wrap' }}>
-          <div style={{ flex: 1, minWidth: 140, background: 'var(--surface-muted)', borderRadius: 11, padding: 13, textAlign: 'center' }}>
-            <div style={{ fontSize: 11, color: 'var(--text-faint)', fontWeight: 600 }}>درآمد مشمول</div>
-            <div style={{ fontSize: 16, fontWeight: 800, marginTop: 3 }}>{faMoney(tax.taxable)}</div>
-          </div>
-          <div style={{ flex: 1, minWidth: 140, background: '#FBEEE8', borderRadius: 11, padding: 13, textAlign: 'center' }}>
-            <div style={{ fontSize: 11, color: 'var(--accent-red)', fontWeight: 600 }}>مالیات برآوردی</div>
-            <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--accent-red)', marginTop: 3 }}>{faMoney(tax.taxAmount)}</div>
-          </div>
-          <div style={{ flex: 1, minWidth: 140, background: '#EAF2EE', borderRadius: 11, padding: 13, textAlign: 'center' }}>
-            <div style={{ fontSize: 11, color: 'var(--accent-green)', fontWeight: 600 }}>ذخیرهٔ ماهانه</div>
-            <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--accent-green)', marginTop: 3 }}>{faMoney(tax.monthlySetAside)}</div>
-          </div>
-        </div>
       </Card>
     </section>
   )

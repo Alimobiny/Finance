@@ -1,7 +1,8 @@
 import type { StateCreator } from 'zustand'
 import type { RootStore, Mutators } from '../rootStoreType'
 import { newId } from '../../lib/format/id'
-import type { Holding, HoldingSub, PortfolioState, PriceKey } from '../../types'
+import { addTextItem, insertTextItem, removeTextItem, updateTextItem } from '../listHelpers'
+import type { Holding, HoldingSub, PortfolioState, PriceKey, TextListItem } from '../../types'
 
 const PALETTE = ['#B0832B', '#3E6B5A', '#5B6BA8', '#2C7A6B', '#8C5A8C', '#9A6B1E', '#1A5276', '#8C3A3A']
 
@@ -22,6 +23,10 @@ export interface PortfolioSlice {
   restoreSub: (holdingId: string, item: HoldingSub, index: number) => void
   setPrice: (key: PriceKey, value: number) => void
   markPricesApplied: () => void
+  addRebalanceNote: () => void
+  updateRebalanceNote: (id: string, text: string) => void
+  removeRebalanceNote: (id: string) => void
+  restoreRebalanceNote: (item: TextListItem, index: number) => void
 }
 
 export const createPortfolioSlice = (
@@ -94,6 +99,23 @@ export const createPortfolioSlice = (
   markPricesApplied: () =>
     set((s) => {
       s.portfolio.pricesUpdatedAt = new Date().toISOString()
+    }),
+
+  addRebalanceNote: () =>
+    set((s) => {
+      addTextItem(s.portfolio.rebalanceNotes)
+    }),
+  updateRebalanceNote: (id, text) =>
+    set((s) => {
+      updateTextItem(s.portfolio.rebalanceNotes, id, text)
+    }),
+  removeRebalanceNote: (id) =>
+    set((s) => {
+      removeTextItem(s.portfolio.rebalanceNotes, id)
+    }),
+  restoreRebalanceNote: (item, index) =>
+    set((s) => {
+      insertTextItem(s.portfolio.rebalanceNotes, item, index)
     }),
 })
 

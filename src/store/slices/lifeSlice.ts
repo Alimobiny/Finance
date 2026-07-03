@@ -2,7 +2,7 @@ import type { StateCreator } from 'zustand'
 import type { RootStore, Mutators } from '../rootStoreType'
 import { newId } from '../../lib/format/id'
 import { addTextItem, insertTextItem, removeTextItem, updateTextItem } from '../listHelpers'
-import type { DayPeriod, LifeState, TextListItem, TimeAnchor } from '../../types'
+import type { DayPeriod, LifeState, TextListItem, TimeAnchor, TodoItem } from '../../types'
 
 export interface LifeSlice {
   life: LifeState
@@ -19,6 +19,13 @@ export interface LifeSlice {
   updateExecutionRule: (id: string, text: string) => void
   removeExecutionRule: (id: string) => void
   restoreExecutionRule: (item: TextListItem, index: number) => void
+
+  addTask: () => void
+  updateTaskText: (id: string, text: string) => void
+  toggleTask: (id: string) => void
+  removeTask: (id: string) => void
+  restoreTask: (item: TodoItem, index: number) => void
+  setNotes: (value: string) => void
 }
 
 export const createLifeSlice = (initial: LifeState): StateCreator<RootStore, Mutators, [], LifeSlice> => (set) => ({
@@ -77,5 +84,32 @@ export const createLifeSlice = (initial: LifeState): StateCreator<RootStore, Mut
   restoreExecutionRule: (item, index) =>
     set((s) => {
       insertTextItem(s.life.executionRules, item, index)
+    }),
+
+  addTask: () =>
+    set((s) => {
+      s.life.tasks.push({ id: newId(), text: '', done: false })
+    }),
+  updateTaskText: (id, text) =>
+    set((s) => {
+      const t = s.life.tasks.find((x) => x.id === id)
+      if (t) t.text = text
+    }),
+  toggleTask: (id) =>
+    set((s) => {
+      const t = s.life.tasks.find((x) => x.id === id)
+      if (t) t.done = !t.done
+    }),
+  removeTask: (id) =>
+    set((s) => {
+      s.life.tasks = s.life.tasks.filter((x) => x.id !== id)
+    }),
+  restoreTask: (item, index) =>
+    set((s) => {
+      s.life.tasks.splice(Math.min(index, s.life.tasks.length), 0, item)
+    }),
+  setNotes: (value) =>
+    set((s) => {
+      s.life.notes = value
     }),
 })

@@ -25,7 +25,9 @@ jobs:
       - run: node scripts/fetch-news.mjs
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # یوزرنیم کانال عمومی تلگرام را در Settings → Secrets and variables → Actions → Variables بگذار
+          # چند کانال عمومی تلگرام را با کاما در متغیر TELEGRAM_CHANNELS بگذار (اختیاری؛ حداکثر ۵).
+          # اگر خالی باشد، لیست پیش‌فرضِ داخل scripts/fetch-news.mjs استفاده می‌شود.
+          TELEGRAM_CHANNELS: ${{ vars.TELEGRAM_CHANNELS }}
           TELEGRAM_CHANNEL: ${{ vars.TELEGRAM_CHANNEL }}
       - name: Commit if changed
         run: |

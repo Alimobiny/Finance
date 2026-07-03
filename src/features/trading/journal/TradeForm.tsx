@@ -5,7 +5,7 @@ import type { NewTradeInput } from '../../../store/slices/tradingSlice'
 import type { TradeDirection, TradeOutcome } from '../../../types'
 import { faDateShort } from '../../../lib/format/date'
 import { toLatinDigits } from '../../../lib/format/number'
-import { computePlannedRR, computeRFromPrices, parsePriceInput } from '../lib/tradeMath'
+import { computePlannedRR, computeRFromPrices, parsePriceInput, rFromProfit } from '../lib/tradeMath'
 
 /** متن ورودی «نتیجهٔ R» را به عدد پاک یا null تبدیل می‌کند (هرگز NaN). */
 function parseRInput(raw: string): number | null {
@@ -29,6 +29,7 @@ const EMPTY_FORM: NewTradeInput = {
   stop: null,
   tp: null,
   exit: null,
+  profit: null,
   ticket: null,
   rr: '',
   r: null,
@@ -45,6 +46,9 @@ export function TradeForm() {
   const symbols = useRootStore((s) => s.settings.symbols)
   const emotions = useRootStore((s) => s.settings.emotions)
   const trades = useRootStore((s) => s.trading.trades)
+  const accounts = useRootStore((s) => s.trading.accounts)
+  const activeAccountId = useRootStore((s) => s.trading.activeAccountId)
+  const activeRisk = accounts.find((a) => a.id === activeAccountId)?.riskPerTrade ?? 0
   const editingTradeId = useRootStore((s) => s.trading.editingTradeId)
   const addTrade = useRootStore((s) => s.addTrade)
   const updateTrade = useRootStore((s) => s.updateTrade)
@@ -73,9 +77,14 @@ export function TradeForm() {
   const tpN = parsePriceInput(priceText.tp)
   const exitN = parsePriceInput(priceText.exit)
 
+  // معاملهٔ وارد‌شده از متاتریدر (سود واقعی دارد): R از سود ÷ «ریسک ثابت حساب» می‌آید،
+  // چون حد ضرر گزارش «آخرین» مقدار است و با سیو سود/ریسک‌فری/تریلینگ، R از قیمت غلط می‌شود.
+  const isImported = form.profit != null
+  const profitR = isImported ? rFromProfit(form.profit, activeRisk) : null
+
   // اگر قیمت‌ها کامل باشند، R و R:R خودکار و عینی محاسبه می‌شوند و بر ورودی دستی مقدم‌اند.
-  const computedR = computeRFromPrices(form.dir, entryN, stopN, exitN)
-  const computedRR = computePlannedRR(entryN, stopN, tpN)
+  const computedR = isImported ? profitR : computeRFromPrices(form.dir, entryN, stopN, exitN)
+  const computedRR = isImported ? null : computePlannedRR(entryN, stopN, tpN)
   const rFromPrices = computedR != null
   const rrFromPrices = computedRR != null
 
@@ -174,14 +183,14 @@ export function TradeForm() {
               style={{ ...inputStyle, direction: 'ltr', textAlign: 'left', ...(rrFromPrices ? lockedStyle : null) }}
             />
           </Field>
-          <Field label={rFromPrices ? 'نتیجهٔ R · خودکار' : 'نتیجهٔ R'}>
+          <Field label={rFromPrices ? (isImported ? 'نتیجهٔ R · از سود' : 'نتیجهٔ R · خودکار') : 'نتیجهٔ R'}>
             <input
               value={rFromPrices ? String(computedR) : rText}
               onChange={(e) => setRText(e.target.value)}
               readOnly={rFromPrices}
               placeholder="مثلاً 2 یا -1"
               inputMode="decimal"
-              title={rFromPrices ? 'از ورود/حدضرر/خروج حساب شد' : undefined}
+              title={rFromPrices ? (isImported ? 'از سود ÷ مبلغ ریسک حساب حساب شد' : 'از ورود/حدضرر/خروج حساب شد') : undefined}
               style={{ ...inputStyle, direction: 'ltr', textAlign: 'left', ...(rFromPrices ? lockedStyle : null) }}
             />
           </Field>

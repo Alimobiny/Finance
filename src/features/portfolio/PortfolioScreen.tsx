@@ -2,6 +2,7 @@ import { useRootStore } from '../../store/rootStore'
 import { useUIStore } from '../../store/uiStore'
 import { ScreenHeader } from '../../components/ui/ScreenHeader'
 import { Card } from '../../components/ui/Card'
+import { EditableTextList } from '../../components/ui/EditableTextList'
 import { HoldingRow } from './HoldingRow'
 import { PricePanel } from './PricePanel'
 import { AssetDonut } from '../../components/ui/AssetDonut'
@@ -13,6 +14,12 @@ export function PortfolioScreen() {
   const editMode = useUIStore((s) => s.editMode)
   const portfolio = useRootStore((s) => s.portfolio)
   const addHolding = useRootStore((s) => s.addHolding)
+
+  const rebalanceNotes = useRootStore((s) => s.portfolio.rebalanceNotes)
+  const addRebalanceNote = useRootStore((s) => s.addRebalanceNote)
+  const updateRebalanceNote = useRootStore((s) => s.updateRebalanceNote)
+  const removeRebalanceNote = useRootStore((s) => s.removeRebalanceNote)
+  const restoreRebalanceNote = useRootStore((s) => s.restoreRebalanceNote)
 
   const total = portfolioTotal(portfolio)
   const defPct = defensivePercent(portfolio)
@@ -94,17 +101,36 @@ export function PortfolioScreen() {
       </div>
 
       <Card title="▪ پیشنهاد تعادل" style={{ marginTop: 18 }}>
-        {suggestions.length > 0 ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
-            {suggestions.map((s) => (
-              <div key={s} style={{ display: 'flex', alignItems: 'flex-start', gap: 9, fontSize: 13, color: 'var(--text)', lineHeight: 1.5 }}>
-                <span style={{ color: 'var(--accent-green)', fontWeight: 700 }}>▪</span>
-                <span>{s}</span>
-              </div>
-            ))}
+        <EditableTextList
+          items={rebalanceNotes}
+          editMode={editMode}
+          itemNoun="یادداشت تعادل"
+          addLabel="+ یادداشت"
+          bulletColor="var(--accent-green)"
+          onAdd={addRebalanceNote}
+          onUpdate={updateRebalanceNote}
+          onRemove={removeRebalanceNote}
+          onRestore={restoreRebalanceNote}
+        />
+        {!editMode && rebalanceNotes.length === 0 && (
+          <div style={{ fontSize: 12.5, color: 'var(--text-quiet)', lineHeight: 1.6 }}>
+            یادداشتی ثبت نشده. برای افزودن، حالت ویرایش را روشن کن. پیشنهاد خودکار سیستم را هم می‌توانی پایین ببینی.
           </div>
-        ) : (
-          <div style={{ fontSize: 13, color: 'var(--text-faint)' }}>ارزش دارایی‌ها را وارد کن تا انحراف‌ها و پیشنهاد تعادل محاسبه شود.</div>
+        )}
+        {suggestions.length > 0 && (
+          <details style={{ marginTop: rebalanceNotes.length > 0 || editMode ? 13 : 8, paddingTop: 12, borderTop: '1px dashed var(--border)' }}>
+            <summary style={{ cursor: 'pointer', fontSize: 12, fontWeight: 600, color: 'var(--accent-navy)', listStyle: 'none' }}>
+              ⚙ پیشنهاد خودکار سیستم (بر اساس انحراف فعلی) — {suggestions.length} مورد
+            </summary>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 10 }}>
+              {suggestions.map((s) => (
+                <div key={s} style={{ display: 'flex', alignItems: 'flex-start', gap: 9, fontSize: 12.5, color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                  <span style={{ color: 'var(--text-quiet)', fontWeight: 700 }}>▹</span>
+                  <span>{s}</span>
+                </div>
+              ))}
+            </div>
+          </details>
         )}
       </Card>
 

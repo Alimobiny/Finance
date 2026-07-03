@@ -31,8 +31,6 @@ export function DashboardScreen() {
 
   const goldenRule = useRootStore((s) => s.dashboard.goldenRule)
   const setGoldenRule = useRootStore((s) => s.setGoldenRule)
-  const marketPulse = useRootStore((s) => s.dashboard.marketPulse)
-  const setMarketPulse = useRootStore((s) => s.setMarketPulse)
 
   return (
     <section style={{ animation: 'fadeUp .3s ease' }}>
@@ -105,27 +103,6 @@ export function DashboardScreen() {
             onUpdate={updateRedLine}
             onRemove={removeRedLine}
             onRestore={restoreRedLine}
-          />
-        </Card>
-
-        <Card title="نبض بازار">
-          <textarea
-            value={marketPulse}
-            onChange={(e) => setMarketPulse(e.target.value)}
-            placeholder="خلاصهٔ اخبار/تحلیل هفتهٔ جاری…"
-            style={{
-              width: '100%',
-              minHeight: 96,
-              resize: 'vertical',
-              border: '1px solid var(--border)',
-              borderRadius: 10,
-              padding: '11px 12px',
-              fontSize: 12.5,
-              lineHeight: 1.7,
-              color: 'var(--text)',
-              background: 'var(--surface-muted)',
-              outline: 'none',
-            }}
           />
         </Card>
 

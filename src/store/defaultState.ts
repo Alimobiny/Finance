@@ -1,6 +1,9 @@
 import { newId } from '../lib/format/id'
 import { SCHEMA_VERSION, type RootState, type TextListItem } from '../types'
 
+/** شناسهٔ ثابت حساب پیش‌فرض تا مهاجرت دادهٔ قدیمی هم به همین حساب بچسبد */
+export const DEFAULT_ACCOUNT_ID = 'acc-main'
+
 const textItems = (texts: string[]): TextListItem[] => texts.map((text) => ({ id: newId(), text }))
 
 /**
@@ -42,8 +45,11 @@ export function createDefaultState(): RootState {
       holdings: [],
       prices: { usd: 0, usdt: 0, coin: 0, gold18: 0 },
       pricesUpdatedAt: null,
+      rebalanceNotes: [],
     },
     trading: {
+      accounts: [{ id: DEFAULT_ACCOUNT_ID, name: 'حساب اصلی', riskPerTrade: 0 }],
+      activeAccountId: DEFAULT_ACCOUNT_ID,
       trades: [],
       editingTradeId: null,
       checklistGroups: [
@@ -149,6 +155,8 @@ export function createDefaultState(): RootState {
         'محفوظهٔ آرامش: پیامد نزدیک را بگو — «اگر الان بخوابم، صبح چه می‌شود»',
       ]),
       currentWeekKey: '',
+      tasks: [],
+      notes: '',
     },
     settings: {
       symbols: textItems(['XAUUSD', 'EURUSD', 'GBPUSD', 'BTCUSD', 'US30']),

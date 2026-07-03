@@ -1,3 +1,4 @@
+import type { Trade } from '../../../types'
 import { useRootStore } from '../../../store/rootStore'
 import { useSoftDelete } from '../../../lib/useSoftDelete'
 import { hasR, resolveOutcome } from '../lib/tradeOutcome'
@@ -15,8 +16,7 @@ function viewShot(src: string) {
   win?.document.write(`<img src="${src}" style="max-width:100%">`)
 }
 
-export function TradesTable() {
-  const trades = useRootStore((s) => s.trading.trades)
+export function TradesTable({ trades }: { trades: Trade[] }) {
   const removeTrade = useRootStore((s) => s.removeTrade)
   const startEditTrade = useRootStore((s) => s.startEditTrade)
   const softDelete = useSoftDelete()

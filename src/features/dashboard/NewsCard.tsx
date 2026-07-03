@@ -7,11 +7,13 @@ interface NewsItem {
   title: string
   note?: string
   url?: string
+  source?: string
 }
 
 interface NewsFeed {
   generatedAt: string | null
   sourceChannel: string | null
+  sources?: string[]
   items: NewsItem[]
 }
 
@@ -73,19 +75,28 @@ export function NewsCard() {
                 {toPersianDigits(i + 1)}
               </span>
               <div style={{ flex: 1 }}>
-                {item.url ? (
-                  <a href={item.url} target="_blank" rel="noreferrer" style={{ color: 'var(--text)', textDecoration: 'none', fontWeight: 600 }}>
-                    {item.title}
-                  </a>
-                ) : (
-                  <span style={{ fontWeight: 600, color: 'var(--text)' }}>{item.title}</span>
-                )}
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, flexWrap: 'wrap' }}>
+                  {item.url ? (
+                    <a href={item.url} target="_blank" rel="noreferrer" style={{ color: 'var(--text)', textDecoration: 'none', fontWeight: 600 }}>
+                      {item.title}
+                    </a>
+                  ) : (
+                    <span style={{ fontWeight: 600, color: 'var(--text)' }}>{item.title}</span>
+                  )}
+                  {item.source && (
+                    <span style={{ fontSize: 9.5, color: 'var(--accent-navy)', background: '#EEF1F8', borderRadius: 5, padding: '1px 6px', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                      @{item.source.replace(/^@/, '')}
+                    </span>
+                  )}
+                </div>
                 {item.note && <div style={{ fontSize: 11.5, color: 'var(--text-muted)', marginTop: 2 }}>{item.note}</div>}
               </div>
             </div>
           ))}
-          {state.feed.sourceChannel && (
-            <div style={{ marginTop: 4, fontSize: 10.5, color: 'var(--text-quiet)' }}>منبع: {state.feed.sourceChannel}</div>
+          {(state.feed.sources?.length || state.feed.sourceChannel) && (
+            <div style={{ marginTop: 4, fontSize: 10.5, color: 'var(--text-quiet)' }}>
+              منابع: {state.feed.sources?.length ? state.feed.sources.join('، ') : state.feed.sourceChannel}
+            </div>
           )}
         </div>
       )}

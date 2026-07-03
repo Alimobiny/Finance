@@ -35,3 +35,14 @@ export function computePlannedRR(entry: Maybe, stop: Maybe, tp: Maybe): number |
   if (risk === 0) return null
   return round2(Math.abs(tp - entry) / risk)
 }
+
+/**
+ * R واقعیِ معامله از روی سود/زیان خالص و «مبلغ ریسک ثابت هر معامله»:
+ *   R = سود ÷ مبلغ ریسک
+ * این روش برای معاملات وارد‌شده از متاتریدر درست است، چون گزارش فقط «آخرین» حد ضرر
+ * را می‌دهد و با سیو سود / ریسک‌فری / تریلینگ، R از روی قیمت غلط می‌شود.
+ */
+export function rFromProfit(profit: Maybe, riskPerTrade: Maybe): number | null {
+  if (!fin(profit) || !fin(riskPerTrade) || riskPerTrade <= 0) return null
+  return round2(profit / riskPerTrade)
+}

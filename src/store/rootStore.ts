@@ -9,9 +9,11 @@ import { createSettingsSlice } from './slices/settingsSlice'
 import type { RootStore } from './rootStoreType'
 import { createDefaultState } from './defaultState'
 import { loadPersistedState } from './persistence'
+import { normalizeState } from './normalize'
 import type { RootState } from '../types'
 
-const initialState = loadPersistedState() ?? createDefaultState()
+const persisted = loadPersistedState()
+const initialState = persisted ? normalizeState(persisted) : createDefaultState()
 
 /** استور اصلیِ داده‌ای اپ — دقیقاً معادل چیزی که در localStorage و Google Drive ذخیره می‌شود */
 export const useRootStore = create<RootStore>()(
@@ -27,12 +29,13 @@ export const useRootStore = create<RootStore>()(
 
 /** جایگزینیِ کامل داده‌های استور با نسخه‌ای که از Google Drive بازیابی یا از فایل پشتیبان بارگذاری شده */
 export function applyRemoteState(state: RootState): void {
+  const normalized = normalizeState(state)
   useRootStore.setState({
-    dashboard: state.dashboard,
-    portfolio: state.portfolio,
-    trading: state.trading,
-    money: state.money,
-    life: state.life,
-    settings: state.settings,
+    dashboard: normalized.dashboard,
+    portfolio: normalized.portfolio,
+    trading: normalized.trading,
+    money: normalized.money,
+    life: normalized.life,
+    settings: normalized.settings,
   })
 }
