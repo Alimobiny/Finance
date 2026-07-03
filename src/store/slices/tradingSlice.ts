@@ -9,6 +9,7 @@ export interface TradingSlice {
   trading: TradingState
 
   addTrade: (input: NewTradeInput) => void
+  importTrades: (inputs: NewTradeInput[]) => { added: number; skipped: number }
   updateTrade: (id: string, input: NewTradeInput) => void
   removeTrade: (id: string) => void
   startEditTrade: (id: string) => void
@@ -44,6 +45,24 @@ export const createTradingSlice = (
     set((s) => {
       s.trading.trades.unshift({ id: newId(), ...input })
     }),
+  importTrades: (inputs) => {
+    let added = 0
+    let skipped = 0
+    set((s) => {
+      const seen = new Set(s.trading.trades.map((t) => t.ticket).filter(Boolean) as string[])
+      // قدیمی→جدید اضافه می‌کنیم و در ابتدای آرایه می‌گذاریم تا در جدول، جدیدترین بالا بماند.
+      for (const input of inputs) {
+        if (input.ticket && seen.has(input.ticket)) {
+          skipped++
+          continue
+        }
+        if (input.ticket) seen.add(input.ticket)
+        s.trading.trades.unshift({ id: newId(), ...input })
+        added++
+      }
+    })
+    return { added, skipped }
+  },
   updateTrade: (id, input) =>
     set((s) => {
       const idx = s.trading.trades.findIndex((t) => t.id === id)

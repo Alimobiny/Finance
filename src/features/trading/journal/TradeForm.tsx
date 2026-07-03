@@ -29,6 +29,7 @@ const EMPTY_FORM: NewTradeInput = {
   stop: null,
   tp: null,
   exit: null,
+  ticket: null,
   rr: '',
   r: null,
   outcome: '',

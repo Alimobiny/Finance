@@ -64,6 +64,8 @@ export interface Trade {
   stop: number | null
   tp: number | null
   exit: number | null
+  /** شناسهٔ پوزیشن در متاتریدر (برای تکراری‌زدایی هنگام وارد کردن گزارش)؛ برای ثبت دستی null */
+  ticket: string | null
   rr: string
   r: number | null
   outcome: TradeOutcome
