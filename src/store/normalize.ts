@@ -38,5 +38,10 @@ export function normalizeState(input: RootState): RootState {
   if (!Array.isArray(life.tasks)) life.tasks = []
   if (typeof life.notes !== 'string') life.notes = ''
 
+  // --- تاریخچهٔ تغییرات ---
+  const history = (s.history ?? {}) as Record<string, unknown>
+  if (!Array.isArray(history.entries)) history.entries = []
+  s.history = history
+
   return input
 }

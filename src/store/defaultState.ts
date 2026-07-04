@@ -163,5 +163,6 @@ export function createDefaultState(): RootState {
       emotions: textItems(['آرام', 'مضطرب', 'عصبانی', 'ترس', 'طمع', 'بی‌تفاوت']),
       lastSyncedAt: null,
     },
+    history: { entries: [] },
   }
 }

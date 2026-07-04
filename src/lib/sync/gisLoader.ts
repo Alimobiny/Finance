@@ -1,3 +1,5 @@
+import { GOOGLE_CLIENT_ID } from './googleClientId'
+
 const GIS_SRC = 'https://accounts.google.com/gsi/client'
 const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.appdata'
 /** برای جلوگیری از رد شدن توکن درست قبل از استفاده، کمی زودتر منقضی‌شده در نظر می‌گیریم */
@@ -48,7 +50,7 @@ function getTokenClient(clientId: string): GisTokenClient {
 }
 
 export function isDriveConfigured(): boolean {
-  return Boolean(import.meta.env.VITE_GOOGLE_CLIENT_ID)
+  return Boolean(GOOGLE_CLIENT_ID)
 }
 
 /**
@@ -56,7 +58,7 @@ export function isDriveConfigured(): boolean {
  * (در صورت وجود نشست فعال گوگل در مرورگر معمولاً بی‌صدا موفق می‌شود).
  */
 export async function requestAccessToken(opts: { silent?: boolean } = {}): Promise<string> {
-  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined
+  const clientId = GOOGLE_CLIENT_ID
   if (!clientId) throw new Error('Google Client ID پیکربندی نشده است')
 
   if (cachedToken && cachedToken.expiresAt > Date.now()) return cachedToken.accessToken

@@ -29,6 +29,7 @@ export function buildSnapshot(store: RootStore): RootState {
     money: store.money,
     life: store.life,
     settings: store.settings,
+    history: store.history,
   }
 }
 

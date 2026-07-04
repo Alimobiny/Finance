@@ -6,6 +6,7 @@ import { createTradingSlice } from './slices/tradingSlice'
 import { createMoneySlice } from './slices/moneySlice'
 import { createLifeSlice } from './slices/lifeSlice'
 import { createSettingsSlice } from './slices/settingsSlice'
+import { createHistorySlice } from './slices/historySlice'
 import type { RootStore } from './rootStoreType'
 import { createDefaultState } from './defaultState'
 import { loadPersistedState } from './persistence'
@@ -24,6 +25,7 @@ export const useRootStore = create<RootStore>()(
     ...createMoneySlice(initialState.money)(...a),
     ...createLifeSlice(initialState.life)(...a),
     ...createSettingsSlice(initialState.settings)(...a),
+    ...createHistorySlice(initialState.history)(...a),
   })),
 )
 
@@ -37,5 +39,6 @@ export function applyRemoteState(state: RootState): void {
     money: normalized.money,
     life: normalized.life,
     settings: normalized.settings,
+    history: normalized.history,
   })
 }

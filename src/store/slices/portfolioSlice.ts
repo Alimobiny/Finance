@@ -2,6 +2,7 @@ import type { StateCreator } from 'zustand'
 import type { RootStore, Mutators } from '../rootStoreType'
 import { newId } from '../../lib/format/id'
 import { addTextItem, insertTextItem, removeTextItem, updateTextItem } from '../listHelpers'
+import { recordChange } from '../history'
 import type { Holding, HoldingSub, PortfolioState, PriceKey, TextListItem } from '../../types'
 
 const PALETTE = ['#B0832B', '#3E6B5A', '#5B6BA8', '#2C7A6B', '#8C5A8C', '#9A6B1E', '#1A5276', '#8C3A3A']
@@ -38,6 +39,7 @@ export const createPortfolioSlice = (
     set((s) => {
       const color = PALETTE[s.portfolio.holdings.length % PALETTE.length]
       s.portfolio.holdings.push({ id: newId(), name: 'دارایی جدید', layer: 'سایر', role: '', target: 0, color, subs: [] })
+      recordChange(s, 'add', 'پرتفولیو', 'افزودن دارایی جدید')
     }),
   updateHolding: (id, patch) =>
     set((s) => {
@@ -46,7 +48,9 @@ export const createPortfolioSlice = (
     }),
   removeHolding: (id) =>
     set((s) => {
-      s.portfolio.holdings = s.portfolio.holdings.filter((h) => h.id !== id)
+      const h = s.portfolio.holdings.find((x) => x.id === id)
+      s.portfolio.holdings = s.portfolio.holdings.filter((x) => x.id !== id)
+      if (h) recordChange(s, 'remove', 'پرتفولیو', `حذف دارایی «${h.name}»`)
     }),
   restoreHolding: (item, index) =>
     set((s) => {

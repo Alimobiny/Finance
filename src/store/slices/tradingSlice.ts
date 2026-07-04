@@ -1,6 +1,8 @@
 import type { StateCreator } from 'zustand'
 import type { RootStore, Mutators } from '../rootStoreType'
 import { newId } from '../../lib/format/id'
+import { toPersianDigits } from '../../lib/format/number'
+import { recordChange } from '../history'
 import { rFromProfit } from '../../features/trading/lib/tradeMath'
 import type { ChecklistItem, PositionSizeInputs, ScoreOption, Trade, TradingState } from '../../types'
 
@@ -52,8 +54,10 @@ export const createTradingSlice = (
   addAccount: (name) =>
     set((s) => {
       const id = newId()
-      s.trading.accounts.push({ id, name: name?.trim() || `حساب ${s.trading.accounts.length + 1}`, riskPerTrade: 0 })
+      const finalName = name?.trim() || `حساب ${s.trading.accounts.length + 1}`
+      s.trading.accounts.push({ id, name: finalName, riskPerTrade: 0 })
       s.trading.activeAccountId = id
+      recordChange(s, 'add', 'معاملات', `ساخت حساب «${finalName}»`)
     }),
   renameAccount: (id, name) =>
     set((s) => {
@@ -73,9 +77,11 @@ export const createTradingSlice = (
   removeAccount: (id) =>
     set((s) => {
       if (s.trading.accounts.length <= 1) return // همیشه دست‌کم یک حساب بماند
+      const acc = s.trading.accounts.find((a) => a.id === id)
       s.trading.accounts = s.trading.accounts.filter((a) => a.id !== id)
       s.trading.trades = s.trading.trades.filter((t) => t.accountId !== id)
       if (s.trading.activeAccountId === id) s.trading.activeAccountId = s.trading.accounts[0].id
+      if (acc) recordChange(s, 'remove', 'معاملات', `حذف حساب «${acc.name}» و معاملاتش`)
     }),
   setActiveAccount: (id) =>
     set((s) => {
@@ -85,6 +91,7 @@ export const createTradingSlice = (
   addTrade: (input) =>
     set((s) => {
       s.trading.trades.unshift({ id: newId(), accountId: s.trading.activeAccountId, ...input })
+      recordChange(s, 'add', 'معاملات', `ثبت معاملهٔ «${input.symbol || 'بدون‌نماد'}»`)
     }),
   importTrades: (inputs) => {
     let added = 0
@@ -108,6 +115,7 @@ export const createTradingSlice = (
         s.trading.trades.unshift({ id: newId(), accountId: accId, ...input, r })
         added++
       }
+      if (added > 0) recordChange(s, 'import', 'معاملات', `وارد کردن ${toPersianDigits(added)} معامله از متاتریدر`)
     })
     return { added, skipped }
   },
@@ -116,10 +124,13 @@ export const createTradingSlice = (
       const idx = s.trading.trades.findIndex((t) => t.id === id)
       if (idx !== -1) s.trading.trades[idx] = { id, accountId: s.trading.trades[idx].accountId, ...input }
       s.trading.editingTradeId = null
+      recordChange(s, 'edit', 'معاملات', `ویرایش معاملهٔ «${input.symbol || 'بدون‌نماد'}»`)
     }),
   removeTrade: (id) =>
     set((s) => {
-      s.trading.trades = s.trading.trades.filter((t) => t.id !== id)
+      const t = s.trading.trades.find((x) => x.id === id)
+      s.trading.trades = s.trading.trades.filter((x) => x.id !== id)
+      if (t) recordChange(s, 'remove', 'معاملات', `حذف معاملهٔ «${t.symbol}»`)
     }),
   startEditTrade: (id) =>
     set((s) => {

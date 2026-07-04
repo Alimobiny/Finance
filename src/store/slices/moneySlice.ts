@@ -1,6 +1,7 @@
 import type { StateCreator } from 'zustand'
 import type { RootStore, Mutators } from '../rootStoreType'
 import { newId } from '../../lib/format/id'
+import { recordChange } from '../history'
 import type { Debt, LineItem, MoneyState, TaxInputs } from '../../types'
 
 export interface MoneySlice {
@@ -46,6 +47,7 @@ export const createMoneySlice = (initial: MoneyState): StateCreator<RootStore, M
   addIncome: () =>
     set((s) => {
       s.money.income.push({ id: newId(), label: 'درآمد جدید', value: 0 })
+      recordChange(s, 'add', 'مالی', 'افزودن ردیف درآمد')
     }),
   updateIncome: (id, patch) =>
     set((s) => {
@@ -64,6 +66,7 @@ export const createMoneySlice = (initial: MoneyState): StateCreator<RootStore, M
   addExpense: () =>
     set((s) => {
       s.money.expenses.push({ id: newId(), label: 'هزینهٔ جدید', value: 0 })
+      recordChange(s, 'add', 'مالی', 'افزودن ردیف هزینه')
     }),
   updateExpense: (id, patch) =>
     set((s) => {
@@ -88,6 +91,7 @@ export const createMoneySlice = (initial: MoneyState): StateCreator<RootStore, M
           ? { ...base, kind, total: 0, dueDate: '', settled: false }
           : { ...base, kind, total: 0, monthly: 0, count: 0, paid: 0 }
       s.money.debts.push(debt)
+      recordChange(s, 'add', 'مالی', `افزودن ${base.name}`)
     }),
   updateDebt: (id, patch) =>
     set((s) => {
@@ -111,7 +115,9 @@ export const createMoneySlice = (initial: MoneyState): StateCreator<RootStore, M
     }),
   removeDebt: (id) =>
     set((s) => {
+      const d = s.money.debts.find((x) => x.id === id)
       s.money.debts = s.money.debts.filter((x) => x.id !== id)
+      if (d) recordChange(s, 'remove', 'مالی', `حذف «${d.name}»`)
     }),
   restoreDebt: (item, index) =>
     set((s) => {

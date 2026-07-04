@@ -209,6 +209,25 @@ export interface SettingsState {
   lastSyncedAt: string | null
 }
 
+// ==================== تاریخچهٔ تغییرات ====================
+
+export type ChangeAction = 'add' | 'edit' | 'remove' | 'import'
+
+export interface HistoryEntry {
+  id: string
+  /** زمان به‌صورت ISO */
+  at: string
+  action: ChangeAction
+  /** حوزه: «معاملات»، «پرتفولیو»، «مالی»، «برنامه» … */
+  area: string
+  /** توضیح کوتاه و خوانا */
+  label: string
+}
+
+export interface HistoryState {
+  entries: HistoryEntry[]
+}
+
 // ==================== ریشه ====================
 
 export interface RootState {
@@ -219,6 +238,7 @@ export interface RootState {
   money: MoneyState
   life: LifeState
   settings: SettingsState
+  history: HistoryState
 }
 
 export const SCHEMA_VERSION = 2

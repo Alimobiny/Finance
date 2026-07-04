@@ -2,6 +2,7 @@ import type { StateCreator } from 'zustand'
 import type { RootStore, Mutators } from '../rootStoreType'
 import { newId } from '../../lib/format/id'
 import { addTextItem, insertTextItem, removeTextItem, updateTextItem } from '../listHelpers'
+import { recordChange } from '../history'
 import type { DayPeriod, LifeState, TextListItem, TimeAnchor, TodoItem } from '../../types'
 
 export interface LifeSlice {
@@ -89,6 +90,7 @@ export const createLifeSlice = (initial: LifeState): StateCreator<RootStore, Mut
   addTask: () =>
     set((s) => {
       s.life.tasks.push({ id: newId(), text: '', done: false })
+      recordChange(s, 'add', 'برنامه', 'افزودن کار جدید')
     }),
   updateTaskText: (id, text) =>
     set((s) => {
@@ -102,7 +104,9 @@ export const createLifeSlice = (initial: LifeState): StateCreator<RootStore, Mut
     }),
   removeTask: (id) =>
     set((s) => {
+      const t = s.life.tasks.find((x) => x.id === id)
       s.life.tasks = s.life.tasks.filter((x) => x.id !== id)
+      if (t) recordChange(s, 'remove', 'برنامه', `حذف کار «${t.text || 'بدون عنوان'}»`)
     }),
   restoreTask: (item, index) =>
     set((s) => {
