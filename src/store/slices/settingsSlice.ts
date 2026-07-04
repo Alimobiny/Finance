@@ -16,7 +16,22 @@ export interface SettingsSlice {
   removeEmotion: (id: string) => void
   restoreEmotion: (item: TextListItem, index: number) => void
 
+  addNewsChannel: (raw: string) => boolean
+  removeNewsChannel: (channel: string) => void
+
   setLastSyncedAt: (iso: string | null) => void
+}
+
+const MAX_NEWS_CHANNELS = 5
+
+/** یوزرنیم کانال را از لینک/@/فاصله پاک می‌کند. */
+export function sanitizeChannel(raw: string): string {
+  return raw
+    .trim()
+    .replace(/^https?:\/\/t\.me\//i, '')
+    .replace(/^@/, '')
+    .replace(/\/.*$/, '')
+    .replace(/\s+/g, '')
 }
 
 export const createSettingsSlice = (
@@ -56,6 +71,24 @@ export const createSettingsSlice = (
   restoreEmotion: (item, index) =>
     set((s) => {
       insertTextItem(s.settings.emotions, item, index)
+    }),
+
+  addNewsChannel: (raw) => {
+    const channel = sanitizeChannel(raw)
+    let ok = false
+    set((s) => {
+      if (!s.settings.newsChannels) s.settings.newsChannels = []
+      const exists = s.settings.newsChannels.some((c) => c.toLowerCase() === channel.toLowerCase())
+      if (channel && !exists && s.settings.newsChannels.length < MAX_NEWS_CHANNELS) {
+        s.settings.newsChannels.push(channel)
+        ok = true
+      }
+    })
+    return ok
+  },
+  removeNewsChannel: (channel) =>
+    set((s) => {
+      s.settings.newsChannels = (s.settings.newsChannels ?? []).filter((c) => c !== channel)
     }),
 
   setLastSyncedAt: (iso) =>

@@ -2,6 +2,7 @@ import { ScreenHeader } from '../../components/ui/ScreenHeader'
 import { SyncPanel } from './SyncPanel'
 import { BackupPanel } from './BackupPanel'
 import { SymbolsTagsManager } from './SymbolsTagsManager'
+import { NewsChannelsManager } from './NewsChannelsManager'
 
 export function SettingsScreen() {
   return (
@@ -16,6 +17,10 @@ export function SettingsScreen() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(290px,1fr))', gap: 14, marginBottom: 14 }}>
         <BackupPanel />
         <SyncPanel />
+      </div>
+
+      <div style={{ marginBottom: 14 }}>
+        <NewsChannelsManager />
       </div>
 
       <SymbolsTagsManager />

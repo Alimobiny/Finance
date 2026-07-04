@@ -38,5 +38,9 @@ export function normalizeState(input: RootState): RootState {
   if (!Array.isArray(life.tasks)) life.tasks = []
   if (typeof life.notes !== 'string') life.notes = ''
 
+  // --- تنظیمات: کانال‌های خبری ---
+  const settings = (s.settings ?? {}) as Record<string, unknown>
+  if (!Array.isArray(settings.newsChannels)) settings.newsChannels = ['newscitypro', 'virauniversitycom']
+
   return input
 }

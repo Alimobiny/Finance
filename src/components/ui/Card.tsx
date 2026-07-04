@@ -10,6 +10,7 @@ type Props = {
 export function Card({ children, title, action, style }: Props) {
   return (
     <div
+      className="card"
       style={{
         background: 'var(--surface)',
         border: '1px solid var(--border)',

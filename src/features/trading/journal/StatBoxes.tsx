@@ -4,7 +4,7 @@ import { faNumber, faPercent } from '../../../lib/format/number'
 
 function Box({ label, value, color, sub }: { label: string; value: string; color: string; sub?: string }) {
   return (
-    <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '13px 14px' }}>
+    <div className="tile" style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '13px 14px' }}>
       <div style={{ fontSize: 11, color: 'var(--text-faint)', fontWeight: 600, marginBottom: 5 }}>{label}</div>
       <div style={{ fontSize: 19, fontWeight: 800, letterSpacing: '-0.4px', color }}>{value}</div>
       {sub && <div style={{ fontSize: 10.5, color: 'var(--text-quiet)', marginTop: 3 }}>{sub}</div>}

@@ -31,6 +31,11 @@
 
   --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.08);
   --shadow-md: 0 12px 34px rgba(0, 0, 0, 0.14);
+  /* سایه‌های لایه‌ای نرم برای حس عمق حرفه‌ای‌تر */
+  --shadow-card: 0 1px 2px rgba(38, 32, 20, 0.04), 0 5px 18px rgba(38, 32, 20, 0.05);
+  --shadow-hover: 0 3px 8px rgba(38, 32, 20, 0.07), 0 14px 34px rgba(38, 32, 20, 0.09);
+  --ring: 0 0 0 3px rgba(26, 82, 118, 0.14);
+  --transition: 0.18s ease;
 
   color-scheme: light;
 }
@@ -46,10 +51,15 @@ body {
 }
 
 body {
-  background: var(--bg);
+  background:
+    radial-gradient(1200px 520px at 78% -8%, rgba(176, 131, 43, 0.06), transparent 60%),
+    radial-gradient(1000px 460px at 8% 0%, rgba(26, 82, 118, 0.05), transparent 55%),
+    linear-gradient(180deg, #f6f4ef 0%, var(--bg) 46%);
+  background-attachment: fixed;
   color: var(--text);
   font-family: 'Vazirmatn', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
   min-height: 100vh;
 }
 
@@ -67,6 +77,64 @@ textarea {
 
 button {
   font: inherit;
+  transition:
+    filter var(--transition),
+    transform var(--transition),
+    box-shadow var(--transition),
+    background var(--transition),
+    border-color var(--transition);
+}
+
+button:not(:disabled):hover {
+  filter: brightness(1.04) saturate(1.03);
+}
+
+button:not(:disabled):active {
+  transform: translateY(1px);
+}
+
+input,
+select,
+textarea {
+  transition:
+    border-color var(--transition),
+    box-shadow var(--transition),
+    background var(--transition);
+}
+
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+  border-color: var(--accent-blue);
+}
+
+/* کارت‌ها: عمق نرم و برجستگی ملایم هنگام هاور */
+.card {
+  box-shadow: var(--shadow-card);
+  transition:
+    box-shadow var(--transition),
+    transform var(--transition),
+    border-color var(--transition);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-hover);
+  border-color: var(--border-strong);
+}
+
+/* کاشی‌های آماری (KPI، آمار ژورنال، خلاصه‌ها) */
+.tile {
+  box-shadow: var(--shadow-card);
+  transition:
+    box-shadow var(--transition),
+    transform var(--transition);
+}
+
+.tile:hover {
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-1px);
 }
 
 ::selection {
