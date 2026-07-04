@@ -15,13 +15,13 @@ export function Card({ children, title, action, style }: Props) {
         background: 'var(--surface)',
         border: '1px solid var(--border)',
         borderRadius: 'var(--radius-lg)',
-        padding: 18,
+        padding: 'var(--pad-card)',
         ...style,
       }}
     >
       {(title || action) && (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 13 }}>
-          {title && <div style={{ fontSize: 13.5, fontWeight: 700 }}>{title}</div>}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--space-2-5)', marginBottom: 'var(--space-3)' }}>
+          {title && <div style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-bold)' }}>{title}</div>}
           {action}
         </div>
       )}

@@ -9,15 +9,15 @@ type Props = {
 
 export function ScreenHeader({ eyebrow, eyebrowColor = 'var(--accent-navy)', title, subtitle }: Props) {
   return (
-    <div style={{ marginBottom: 18 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+    <div style={{ marginBottom: 'var(--space-4-5)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-1-5)' }}>
         <span style={{ width: 6, height: 6, borderRadius: '50%', background: eyebrowColor, boxShadow: `0 0 0 3px ${eyebrowColor}22` }} />
-        <span style={{ fontSize: 12, fontWeight: 700, color: eyebrowColor, letterSpacing: '.5px' }}>{eyebrow}</span>
+        <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-bold)', color: eyebrowColor, letterSpacing: '.5px' }}>{eyebrow}</span>
       </div>
-      <h1 style={{ margin: '6px 0 0', fontSize: 25, fontWeight: 800, letterSpacing: '-0.5px' }}>{title}</h1>
-      <div style={{ width: 46, height: 3, borderRadius: 3, marginTop: 8, background: `linear-gradient(90deg, ${eyebrowColor}, transparent)` }} />
+      <h1 style={{ margin: 'var(--space-1-5) 0 0', fontSize: 'var(--fs-3xl)', fontWeight: 'var(--fw-extrabold)', letterSpacing: '-0.5px' }}>{title}</h1>
+      <div style={{ width: 46, height: 3, borderRadius: 3, marginTop: 'var(--space-2)', background: `linear-gradient(90deg, ${eyebrowColor}, transparent)` }} />
       {subtitle && (
-        <p style={{ margin: '9px 0 0', fontSize: 13, color: 'var(--text-faint)', lineHeight: 1.6, maxWidth: 640 }}>{subtitle}</p>
+        <p style={{ margin: 'var(--space-2) 0 0', fontSize: 'var(--fs-sm)', color: 'var(--text-faint)', lineHeight: 'var(--lh-relaxed)', maxWidth: 640 }}>{subtitle}</p>
       )}
     </div>
   )

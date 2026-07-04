@@ -2,18 +2,10 @@ import { useRootStore } from '../../store/rootStore'
 import { computeTradeStats } from '../trading/lib/tradeStats'
 import { portfolioTotal } from '../portfolio/lib/computeHoldingValue'
 import { faMoney, faNumber, faPercent } from '../../lib/format/number'
+import { StatTile } from '../../components/ui/StatTile'
 
-function Kpi({ label, value, sub, color }: { label: string; value: string; sub: string; color: string }) {
-  return (
-    <div className="tile" style={{ position: 'relative', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 13, padding: '15px 16px', overflow: 'hidden' }}>
-      <div style={{ position: 'absolute', top: 0, right: 0, left: 0, height: 3, background: `linear-gradient(90deg, ${color}, ${color}44)` }} />
-      <div style={{ fontSize: 11.5, color: 'var(--text-faint)', fontWeight: 600, marginBottom: 6 }}>{label}</div>
-      <div style={{ fontSize: 21, fontWeight: 800, letterSpacing: '-0.5px', color }}>{value}</div>
-      <div style={{ fontSize: 11, color: 'var(--text-quiet)', marginTop: 3 }}>{sub}</div>
-    </div>
-  )
-}
-
+// کاشی‌های KPI حالا از primitive مشترک StatTile استفاده می‌کنند؛ کامپوننت
+// محلیِ Kpi حذف شد چون با Box در ژورنال تقریباً یکسان بود (رفع تکرار).
 export function KpiCards() {
   const trades = useRootStore((s) => s.trading.trades)
   const portfolio = useRootStore((s) => s.portfolio)
@@ -21,21 +13,25 @@ export function KpiCards() {
   const total = portfolioTotal(portfolio)
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(165px,1fr))', gap: 12, marginBottom: 16 }}>
-      <Kpi label="تعداد معاملات ثبت‌شده" value={faNumber(stats.count)} sub="هدف: جمع ۵۰ تا ۱۰۰" color="var(--accent-navy)" />
-      <Kpi
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(165px,1fr))', gap: 'var(--space-3)', marginBottom: 'var(--space-4)' }}>
+      <StatTile size="kpi" accentBar label="تعداد معاملات ثبت‌شده" value={faNumber(stats.count)} sub="هدف: جمع ۵۰ تا ۱۰۰" color="var(--accent-navy)" />
+      <StatTile
+        size="kpi"
+        accentBar
         label="Expectancy (معیار اصلی)"
         value={stats.expectancy == null ? '—' : faNumber(stats.expectancy, 2)}
         sub="مثبت = سیستم سوددهی"
         color={stats.expectancy == null ? 'var(--text-quiet)' : stats.expectancy >= 0 ? 'var(--accent-green)' : 'var(--accent-red-strong)'}
       />
-      <Kpi
+      <StatTile
+        size="kpi"
+        accentBar
         label="نرخ رعایت قانون ۱"
         value={stats.rule1Rate == null ? '—' : faPercent(stats.rule1Rate, 0)}
         sub="هدف ۱۰۰٪"
         color={stats.rule1Rate == null ? 'var(--text-quiet)' : stats.rule1Rate >= 100 ? 'var(--accent-green)' : 'var(--accent-gold-dark)'}
       />
-      <Kpi label="پرتفولیو" value={total === 0 ? '—' : faMoney(total)} sub="هدف ۶۰٪ دفاعی" color="var(--accent-green)" />
+      <StatTile size="kpi" accentBar label="پرتفولیو" value={total === 0 ? '—' : faMoney(total)} sub="هدف ۶۰٪ دفاعی" color="var(--accent-green)" />
     </div>
   )
 }
