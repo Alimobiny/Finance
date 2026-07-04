@@ -162,7 +162,6 @@ export function createDefaultState(): RootState {
       symbols: textItems(['XAUUSD', 'EURUSD', 'GBPUSD', 'BTCUSD', 'US30']),
       emotions: textItems(['آرام', 'مضطرب', 'عصبانی', 'ترس', 'طمع', 'بی‌تفاوت']),
       lastSyncedAt: null,
-      newsChannels: ['newscitypro', 'virauniversitycom'],
     },
   }
 }

@@ -207,8 +207,6 @@ export interface SettingsState {
   symbols: TextListItem[]
   emotions: TextListItem[]
   lastSyncedAt: string | null
-  /** یوزرنیم کانال‌های عمومی تلگرام برای خلاصهٔ اخبار (حداکثر ۵) */
-  newsChannels: string[]
 }
 
 // ==================== ریشه ====================

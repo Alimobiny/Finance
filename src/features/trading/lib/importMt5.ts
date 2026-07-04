@@ -1,6 +1,7 @@
 import type { TradeDirection } from '../../../types'
 import type { NewTradeInput } from '../../../store/slices/tradingSlice'
 import { faDateShort } from '../../../lib/format/date'
+import { computePlannedRR } from './tradeMath'
 
 // وارد کردن معاملاتِ بسته‌شده از گزارش HTML متاتریدر ۵ (History → Report).
 // بخش «Positions» را می‌خوانیم که برای هر پوزیشن این ستون‌ها را دارد:
@@ -107,11 +108,15 @@ export function parseMt5Html(html: string): Mt5ParseResult {
     const symbol = (cells[typeIdx - 1] || 'XAUUSD').replace(/!+$/, '')
     const entry = num(cells[vi + 1])
     const slRaw = num(cells[vi + 2])
+    const tpRaw = num(cells[vi + 3])
     const exit = num(cells[vi + 5])
 
-    // در متاتریدر «0» یعنی حدضرر تنظیم نشده. حدضرر گزارش «آخرین» مقدار است، نه اولیه؛
+    // در متاتریدر «0» یعنی حدضرر/حدسود تنظیم نشده. حدضرر گزارش «آخرین» مقدار است، نه اولیه؛
     // برای همین R را از قیمت حساب نمی‌کنیم و فقط برای اطلاع ذخیره‌اش می‌کنیم.
     const stop = slRaw && slRaw !== 0 ? slRaw : null
+    const tp = tpRaw && tpRaw !== 0 ? tpRaw : null
+    // نسبت R:R از ورود/حدضرر/حدسودِ گزارش (اگر تنظیم شده باشند).
+    const rr = computePlannedRR(entry, stop, tp)
 
     // سود/زیان خالص = Profit + Swap + Commission (سه ستون آخر) به دلار.
     const gross = num(cells[cells.length - 1])
@@ -126,13 +131,13 @@ export function parseMt5Html(html: string): Mt5ParseResult {
       riskPercent: '',
       entry,
       stop,
-      tp: null,
+      tp,
       exit,
       profit,
       // R نهایی در استور از روی سود ÷ «ریسک ثابت حساب» محاسبه می‌شود (اینجا هنوز نامعلوم).
       r: null,
       ticket: ticket || null,
-      rr: '',
+      rr: rr != null ? String(rr) : '',
       outcome: profit != null ? (profit > 0 ? 'win' : profit < 0 ? 'loss' : 'be') : '',
       checklistFollowed: true,
       rule1Followed: true,
