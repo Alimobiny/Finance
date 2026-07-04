@@ -15,10 +15,22 @@ export function normalizeState(input: RootState): RootState {
 
   // --- معاملات: حساب‌ها، حساب فعال، و اتصال هر معامله به یک حساب ---
   const trading = (s.trading ?? {}) as Record<string, unknown>
-  let accounts = trading.accounts as TradingAccount[] | undefined
-  if (!Array.isArray(accounts) || accounts.length === 0) {
-    accounts = [{ id: DEFAULT_ACCOUNT_ID, name: 'حساب اصلی', riskPerTrade: 0 }]
-    trading.accounts = accounts
+  let accounts: TradingAccount[]
+  const rawAccounts = trading.accounts as TradingAccount[] | undefined
+  if (!Array.isArray(rawAccounts) || rawAccounts.length === 0) {
+    accounts = [{ id: DEFAULT_ACCOUNT_ID, name: 'حساب اصلی', balance: 0, riskPercent: 1 }]
+  } else {
+    accounts = rawAccounts
+  }
+  trading.accounts = accounts
+  // مهاجرت مدل ریسک: از riskPerTrade قدیمی به balance + riskPercent (با حفظ مبلغ ریسک قبلی).
+  for (const a of accounts as unknown as Array<Record<string, unknown>>) {
+    if (typeof a.riskPercent !== 'number') a.riskPercent = 1
+    if (typeof a.balance !== 'number') {
+      const old = typeof a.riskPerTrade === 'number' ? a.riskPerTrade : 0
+      a.balance = old > 0 ? (old * 100) / (a.riskPercent as number) : 0
+    }
+    delete a.riskPerTrade
   }
   const accountIds = new Set(accounts.map((a) => a.id))
   let activeId = trading.activeAccountId as string | undefined

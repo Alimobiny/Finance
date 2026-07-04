@@ -46,3 +46,9 @@ export function rFromProfit(profit: Maybe, riskPerTrade: Maybe): number | null {
   if (!fin(profit) || !fin(riskPerTrade) || riskPerTrade <= 0) return null
   return round2(profit / riskPerTrade)
 }
+
+/** مبلغ ریسک هر معامله (به دلار) = موجودی حساب × درصد ریسک ÷ ۱۰۰. اگر نامعتبر بود ۰. */
+export function accountRiskAmount(a: { balance: number; riskPercent: number }): number {
+  const v = (a.balance * a.riskPercent) / 100
+  return Number.isFinite(v) && v > 0 ? v : 0
+}

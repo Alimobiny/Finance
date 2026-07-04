@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useRootStore } from '../../../store/rootStore'
-import { faMoney } from '../../../lib/format/number'
+import { faNumber } from '../../../lib/format/number'
+import { accountRiskAmount } from '../lib/tradeMath'
 import { decodeReport, parseMt5Html, type ParsedTrade } from '../lib/importMt5'
 
 type Stage =
@@ -58,13 +59,13 @@ export function ImportPanel() {
           </div>
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 11, background: 'var(--surface-muted)', borderRadius: 9, padding: '8px 11px', lineHeight: 1.6 }}>
             معاملات به حساب <b>«{activeAccount?.name}»</b> اضافه می‌شوند.{' '}
-            {activeAccount && activeAccount.riskPerTrade > 0 ? (
+            {activeAccount && accountRiskAmount(activeAccount) > 0 ? (
               <>
-                نتیجهٔ R = سود ÷ <b>{faMoney(activeAccount.riskPerTrade)}</b> (مبلغ ریسک هر معامله).
+                نتیجهٔ R = سود ÷ <b>${faNumber(accountRiskAmount(activeAccount), 0)}</b> (موجودی × ٪ ریسک).
               </>
             ) : (
               <b style={{ color: 'var(--accent-gold-dark)' }}>
-                برای محاسبهٔ R، اول «مبلغ ریسک هر معامله» این حساب را در بالای همین صفحه تنظیم کن.
+                برای محاسبهٔ R، اول «موجودی حساب» و «٪ ریسک» را در بالای همین صفحه تنظیم کن.
               </b>
             )}
           </div>

@@ -5,7 +5,7 @@ import type { NewTradeInput } from '../../../store/slices/tradingSlice'
 import type { TradeDirection, TradeOutcome } from '../../../types'
 import { faDateShort } from '../../../lib/format/date'
 import { toLatinDigits } from '../../../lib/format/number'
-import { computePlannedRR, computeRFromPrices, parsePriceInput, rFromProfit } from '../lib/tradeMath'
+import { accountRiskAmount, computePlannedRR, computeRFromPrices, parsePriceInput, rFromProfit } from '../lib/tradeMath'
 
 /** متن ورودی «نتیجهٔ R» را به عدد پاک یا null تبدیل می‌کند (هرگز NaN). */
 function parseRInput(raw: string): number | null {
@@ -48,7 +48,8 @@ export function TradeForm() {
   const trades = useRootStore((s) => s.trading.trades)
   const accounts = useRootStore((s) => s.trading.accounts)
   const activeAccountId = useRootStore((s) => s.trading.activeAccountId)
-  const activeRisk = accounts.find((a) => a.id === activeAccountId)?.riskPerTrade ?? 0
+  const activeAccount = accounts.find((a) => a.id === activeAccountId)
+  const activeRisk = activeAccount ? accountRiskAmount(activeAccount) : 0
   const editingTradeId = useRootStore((s) => s.trading.editingTradeId)
   const addTrade = useRootStore((s) => s.addTrade)
   const updateTrade = useRootStore((s) => s.updateTrade)

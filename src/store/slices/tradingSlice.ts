@@ -3,8 +3,8 @@ import type { RootStore, Mutators } from '../rootStoreType'
 import { newId } from '../../lib/format/id'
 import { toPersianDigits } from '../../lib/format/number'
 import { recordChange } from '../history'
-import { rFromProfit } from '../../features/trading/lib/tradeMath'
-import type { ChecklistItem, PositionSizeInputs, ScoreOption, Trade, TradingState } from '../../types'
+import { accountRiskAmount, rFromProfit } from '../../features/trading/lib/tradeMath'
+import type { ChecklistItem, PositionSizeInputs, ScoreOption, Trade, TradingAccount, TradingState } from '../../types'
 
 /** ورودی ثبت معامله؛ حساب به‌صورت خودکار «حساب فعال» می‌شود، پس accountId اینجا نیست. */
 export type NewTradeInput = Omit<Trade, 'id' | 'accountId'>
@@ -13,8 +13,7 @@ export interface TradingSlice {
   trading: TradingState
 
   addAccount: (name?: string) => void
-  renameAccount: (id: string, name: string) => void
-  setAccountRisk: (id: string, riskPerTrade: number) => void
+  updateAccount: (id: string, patch: Partial<Pick<TradingAccount, 'name' | 'balance' | 'riskPercent'>>) => void
   removeAccount: (id: string) => void
   setActiveAccount: (id: string) => void
 
@@ -55,23 +54,21 @@ export const createTradingSlice = (
     set((s) => {
       const id = newId()
       const finalName = name?.trim() || `حساب ${s.trading.accounts.length + 1}`
-      s.trading.accounts.push({ id, name: finalName, riskPerTrade: 0 })
+      s.trading.accounts.push({ id, name: finalName, balance: 0, riskPercent: 1 })
       s.trading.activeAccountId = id
       recordChange(s, 'add', 'معاملات', `ساخت حساب «${finalName}»`)
     }),
-  renameAccount: (id, name) =>
-    set((s) => {
-      const acc = s.trading.accounts.find((a) => a.id === id)
-      if (acc) acc.name = name
-    }),
-  setAccountRisk: (id, riskPerTrade) =>
+  updateAccount: (id, patch) =>
     set((s) => {
       const acc = s.trading.accounts.find((a) => a.id === id)
       if (!acc) return
-      acc.riskPerTrade = riskPerTrade
-      // R معاملاتِ وارد‌شدهٔ همین حساب (که سود واقعی دارند) را با ریسک جدید بازمحاسبه کن.
-      for (const t of s.trading.trades) {
-        if (t.accountId === id && t.profit != null) t.r = rFromProfit(t.profit, riskPerTrade)
+      Object.assign(acc, patch)
+      // اگر موجودی یا درصد ریسک عوض شد، مبلغ ریسک و R معاملاتِ وارد‌شده را بازمحاسبه کن.
+      if (patch.balance !== undefined || patch.riskPercent !== undefined) {
+        const amount = accountRiskAmount(acc)
+        for (const t of s.trading.trades) {
+          if (t.accountId === id && t.profit != null) t.r = rFromProfit(t.profit, amount)
+        }
       }
     }),
   removeAccount: (id) =>
@@ -98,7 +95,8 @@ export const createTradingSlice = (
     let skipped = 0
     set((s) => {
       const accId = s.trading.activeAccountId
-      const risk = s.trading.accounts.find((a) => a.id === accId)?.riskPerTrade ?? 0
+      const acc = s.trading.accounts.find((a) => a.id === accId)
+      const risk = acc ? accountRiskAmount(acc) : 0
       // تکراری‌زدایی فقط داخل همین حساب (شمارهٔ پوزیشن بین حساب‌های مختلف می‌تواند تکرار شود).
       const seen = new Set(
         s.trading.trades.filter((t) => t.accountId === accId).map((t) => t.ticket).filter(Boolean) as string[],

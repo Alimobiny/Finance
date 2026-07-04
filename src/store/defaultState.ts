@@ -48,7 +48,7 @@ export function createDefaultState(): RootState {
       rebalanceNotes: [],
     },
     trading: {
-      accounts: [{ id: DEFAULT_ACCOUNT_ID, name: 'حساب اصلی', riskPerTrade: 0 }],
+      accounts: [{ id: DEFAULT_ACCOUNT_ID, name: 'حساب اصلی', balance: 0, riskPercent: 1 }],
       activeAccountId: DEFAULT_ACCOUNT_ID,
       trades: [],
       editingTradeId: null,
