@@ -14,6 +14,7 @@
   --accent-blue: #1a5276;
   --accent-blue-dark: #1f2d4d;
   --accent-navy: #2c3e66;
+  --accent-navy-soft: #eef1f8;
   --accent-gold: #b0832b;
   --accent-gold-dark: #9a6b1e;
   --accent-green: #1e6f4c;
@@ -22,6 +23,7 @@
   --accent-red-soft: #fbeee8;
   --accent-red-strong: #bb4631;
   --accent-purple: #5b4b8a;
+  --accent-purple-soft: #f2eff8;
   --accent-teal: #2c7a6b;
 
   --radius-sm: 7px;

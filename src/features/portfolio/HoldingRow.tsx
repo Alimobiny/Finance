@@ -13,7 +13,7 @@ import type { Holding, PriceKey } from '../../types'
 const UNIT_LABEL: Record<PriceKey, string> = { usd: 'دلار', usdt: 'تتر', coin: 'سکه', gold18: 'گرم طلا' }
 
 const STATUS_STYLE: Record<string, { bg: string; color: string }> = {
-  متعادل: { bg: '#EEF1F8', color: 'var(--accent-navy)' },
+  متعادل: { bg: 'var(--accent-navy-soft)', color: 'var(--accent-navy)' },
   'کم‌وزن': { bg: 'var(--accent-green-soft)', color: 'var(--accent-green)' },
   'پروزن': { bg: 'var(--accent-red-soft)', color: '#B5572F' },
   '—': { bg: '#F0EDE6', color: 'var(--text-quiet)' },

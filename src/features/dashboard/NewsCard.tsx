@@ -132,7 +132,7 @@ export function NewsCard() {
               <div key={ch.channel}>
                 {ch.channel && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 9 }}>
-                    <span style={{ fontSize: 11.5, fontWeight: 700, color: 'var(--accent-navy)', background: '#EEF1F8', borderRadius: 7, padding: '3px 10px' }}>@{ch.channel}</span>
+                    <span style={{ fontSize: 11.5, fontWeight: 700, color: 'var(--accent-navy)', background: 'var(--accent-navy-soft)', borderRadius: 7, padding: '3px 10px' }}>@{ch.channel}</span>
                     <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
                   </div>
                 )}

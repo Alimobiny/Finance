@@ -5,7 +5,7 @@ import type { ChangeAction } from '../../types'
 
 const ACTION_META: Record<ChangeAction, { label: string; icon: string; color: string; bg: string }> = {
   add: { label: 'افزودن', icon: '＋', color: 'var(--accent-green)', bg: 'var(--accent-green-soft)' },
-  import: { label: 'وارد کردن', icon: '↓', color: 'var(--accent-navy)', bg: '#EEF1F8' },
+  import: { label: 'وارد کردن', icon: '↓', color: 'var(--accent-navy)', bg: 'var(--accent-navy-soft)' },
   edit: { label: 'ویرایش', icon: '✎', color: 'var(--accent-gold-dark)', bg: '#FEF8EC' },
   remove: { label: 'حذف', icon: '×', color: 'var(--accent-red-strong)', bg: 'var(--accent-red-soft)' },
 }

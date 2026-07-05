@@ -118,7 +118,7 @@ export function DashboardScreen() {
                     fontSize: 11,
                     fontWeight: 700,
                     color: 'var(--accent-navy)',
-                    background: '#EEF1F8',
+                    background: 'var(--accent-navy-soft)',
                     borderRadius: 7,
                     padding: '6px 4px',
                   }}

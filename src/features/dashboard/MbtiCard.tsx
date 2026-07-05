@@ -29,7 +29,7 @@ export function MbtiCard() {
             width: 46,
             height: 46,
             borderRadius: 12,
-            background: 'linear-gradient(135deg,#5B4B8A,#3A2F66)',
+            background: 'linear-gradient(135deg,var(--accent-purple),#3A2F66)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -49,7 +49,7 @@ export function MbtiCard() {
           </div>
         </div>
         <div style={{ flex: 1 }} />
-        <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--accent-purple)', background: '#F2EFF8', borderRadius: 8, padding: '7px 13px' }}>
+        <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--accent-purple)', background: 'var(--accent-purple-soft)', borderRadius: 8, padding: '7px 13px' }}>
           شعار: استقلال + شایستگی = کمال
         </div>
       </div>
@@ -62,7 +62,7 @@ export function MbtiCard() {
               <span style={{ color: 'var(--text-quiet)' }}>{d.opp}</span>
             </div>
             <div style={{ height: 8, borderRadius: 6, background: '#EFEBF5', overflow: 'hidden' }}>
-              <div style={{ height: '100%', width: `${d.pct}%`, background: 'linear-gradient(90deg,#5B4B8A,#7A68AD)', borderRadius: 6 }} />
+              <div style={{ height: '100%', width: `${d.pct}%`, background: 'linear-gradient(90deg,var(--accent-purple),#7A68AD)', borderRadius: 6 }} />
             </div>
           </div>
         ))}
@@ -92,7 +92,7 @@ export function MbtiCard() {
       <div style={{ marginTop: 13, paddingTop: 13, borderTop: '1px dashed var(--border)', display: 'flex', gap: 7, flexWrap: 'wrap', alignItems: 'center' }}>
         <span style={{ fontSize: 11.5, color: 'var(--text-faint)', fontWeight: 600 }}>مشاغل هم‌راستا:</span>
         {JOBS.map((j) => (
-          <span key={j} style={{ fontSize: 11.5, color: 'var(--accent-purple)', background: '#F2EFF8', borderRadius: 20, padding: '4px 11px' }}>
+          <span key={j} style={{ fontSize: 11.5, color: 'var(--accent-purple)', background: 'var(--accent-purple-soft)', borderRadius: 20, padding: '4px 11px' }}>
             {j}
           </span>
         ))}

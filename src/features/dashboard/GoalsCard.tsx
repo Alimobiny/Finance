@@ -17,7 +17,7 @@ export function GoalsCard() {
   return (
     <div
       style={{
-        background: 'linear-gradient(135deg,#2C3E66,#1F2D4D)',
+        background: 'linear-gradient(135deg,var(--accent-navy),var(--accent-blue-dark))',
         borderRadius: 'var(--radius-xl)',
         padding: '22px 24px',
         color: '#EAEEF6',

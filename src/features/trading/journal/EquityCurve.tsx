@@ -72,7 +72,7 @@ export function EquityCurve({ trades }: { trades: Trade[] }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
           <div style={{ fontSize: 13.5, fontWeight: 700 }}>منحنی رشد سرمایه</div>
           {series && (
-            <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--accent-navy)', background: '#EEF1F8', borderRadius: 6, padding: '2px 8px' }}>
+            <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--accent-navy)', background: 'var(--accent-navy-soft)', borderRadius: 6, padding: '2px 8px' }}>
               {series.mode === 'R' ? 'R تجمعی' : 'سود تجمعی ($)'}
             </span>
           )}
