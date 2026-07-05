@@ -3,6 +3,7 @@ import { useRootStore } from '../../../store/rootStore'
 import { faNumber } from '../../../lib/format/number'
 import { accountRiskAmount } from '../lib/tradeMath'
 import { decodeReport, parseMt5Html, type ParsedTrade } from '../lib/importMt5'
+import { looksLikeEaJson, parseEaJson } from '../lib/importEaJson'
 
 type Stage =
   | { kind: 'idle' }
@@ -27,9 +28,10 @@ export function ImportPanel() {
     try {
       const buffer = await file.arrayBuffer()
       const text = decodeReport(buffer) // فایل متاتریدر معمولاً UTF-16 است
-      const { trades, skipped } = parseMt5Html(text)
+      // فرمت را خودکار تشخیص می‌دهیم: JSONِ خروجیِ EA یا گزارشِ HTML متاتریدر.
+      const { trades, skipped } = looksLikeEaJson(text) ? parseEaJson(text) : parseMt5Html(text)
       if (trades.length === 0) {
-        setStage({ kind: 'error', msg: 'هیچ معاملهٔ بسته‌شده‌ای در فایل پیدا نشد. مطمئن شو از MT5 مسیر History → کلیک راست → Report (خروجی HTML) گرفته‌ای.' })
+        setStage({ kind: 'error', msg: 'هیچ معاملهٔ معتبری در فایل پیدا نشد. یا گزارشِ HTML متاتریدر (History → Report) بده، یا فایلِ JSONِ خروجیِ EA قطب‌نما.' })
         return
       }
       setStage({ kind: 'parsed', trades, skipped, fileName: file.name })
@@ -49,13 +51,16 @@ export function ImportPanel() {
       <div onClick={() => setOpen((v) => !v)} style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
         <span style={{ fontSize: 13, color: 'var(--text-quiet)' }}>{open ? '▾' : '▸'}</span>
         <span style={{ fontSize: 13.5, fontWeight: 700 }}>وارد کردن خودکار از متاتریدر ۵</span>
-        <span style={{ fontSize: 11, color: 'var(--text-quiet)' }}>· گزارش HTML را بده تا معاملات خودکار ثبت شوند</span>
+        <span style={{ fontSize: 11, color: 'var(--text-quiet)' }}>· گزارش HTML یا فایل JSONِ EA را بده</span>
       </div>
 
       {open && (
         <div style={{ marginTop: 13 }}>
           <div style={{ fontSize: 11.5, color: 'var(--text-faint)', lineHeight: 1.7, marginBottom: 11 }}>
             در MT5: پنل <b>Toolbox</b> → تب <b>History</b> → کلیک راست → <b>Report</b> → ذخیره به‌صورت HTML. سپس همان فایل را این‌جا انتخاب کن. معاملات تکراری (بر اساس شمارهٔ پوزیشن) دوباره اضافه نمی‌شوند.
+          </div>
+          <div style={{ fontSize: 11.5, color: 'var(--accent-navy)', lineHeight: 1.7, marginBottom: 11, background: 'var(--accent-navy-soft)', borderRadius: 9, padding: '8px 11px' }}>
+            💡 اگر فایلِ <b>JSONِ خروجیِ EA قطب‌نما</b> را بدهی، «ریسکِ واقعیِ هر معامله» و «R:R واقعی» هم وارد می‌شوند (چون EA استاپِ اولیه را قبل از تریل ثبت می‌کند) و R دقیق‌تر از حالتِ HTML محاسبه می‌شود.
           </div>
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 11, background: 'var(--surface-muted)', borderRadius: 9, padding: '8px 11px', lineHeight: 1.6 }}>
             معاملات به حساب <b>«{activeAccount?.name}»</b> اضافه می‌شوند.{' '}
@@ -71,8 +76,8 @@ export function ImportPanel() {
           </div>
 
           <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer', border: '1px dashed var(--border-strong)', background: 'var(--surface-muted)', borderRadius: 9, padding: '9px 14px', fontSize: 12.5, fontWeight: 600, color: 'var(--text-muted)' }}>
-            📄 انتخاب فایل گزارش (HTML)
-            <input type="file" accept=".html,.htm,text/html" onChange={onFile} style={{ display: 'none' }} />
+            📄 انتخاب فایل گزارش (HTML یا JSON)
+            <input type="file" accept=".html,.htm,.json,text/html,application/json" onChange={onFile} style={{ display: 'none' }} />
           </label>
 
           {stage.kind === 'error' && (

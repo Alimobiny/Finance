@@ -52,7 +52,7 @@ export function sanePlannedRR(entry: number | null, stop: number | null, tp: num
 }
 
 /** «2026.07.03 10:15:30» → Date؛ اگر نشد null. */
-function parseMtDate(raw: string | undefined): Date | null {
+export function parseMtDate(raw: string | undefined): Date | null {
   if (!raw) return null
   const m = raw.match(/(\d{4})\.(\d{2})\.(\d{2})\s+(\d{2}):(\d{2})(?::(\d{2}))?/)
   if (!m) return null
@@ -147,7 +147,10 @@ export function parseMt5Html(html: string): Mt5ParseResult {
       tp,
       exit,
       profit,
-      // R نهایی در استور از روی سود ÷ «ریسک ثابت حساب» محاسبه می‌شود (اینجا هنوز نامعلوم).
+      // R نهایی در استور محاسبه می‌شود. ریسکِ واقعیِ دلاری از گزارشِ HTML قابلِ‌اعتماد
+      // نیست (استاپِ آخر/تریل‌شده)؛ null می‌ماند تا به ریسکِ ثابتِ حساب برگردد. مسیرِ EA
+      // ریسکِ واقعی را مستقیم پر می‌کند.
+      riskUsd: null,
       r: null,
       ticket: ticket || null,
       rr: rr != null ? String(rr) : '',
