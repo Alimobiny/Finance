@@ -1,5 +1,6 @@
 import type { RootState, Trade, TradingAccount } from '../types'
 import { DEFAULT_ACCOUNT_ID } from './defaultState'
+import { newId } from '../lib/format/id'
 
 /**
  * دادهٔ ذخیره‌شدهٔ نسخه‌های قبلی (localStorage / Google Drive / فایل پشتیبان) ممکن است
@@ -44,6 +45,28 @@ export function normalizeState(input: RootState): RootState {
     if (t.profit === undefined) t.profit = null
   }
   trading.trades = trades
+
+  // مهاجرتِ امتیازدهی: اگر بخش «وضعیت بازار» (۲۷٫۵ امتیاز، طبق محاسبه‌گر IPS) جا
+  // افتاده باشد آن را تزریق می‌کنیم. بدون این بخش، حداکثر امتیاز ۴۷٫۵ می‌ماند و
+  // آستانهٔ ۶۰ هرگز دست‌یافتنی نیست (همیشه «وارد نشو»). غیرمخرب و idempotent است.
+  const scoreSections = Array.isArray(trading.scoreSections) ? (trading.scoreSections as Array<Record<string, unknown>>) : null
+  if (scoreSections && scoreSections.length > 0 && !scoreSections.some((sec) => typeof sec.title === 'string' && sec.title.includes('وضعیت بازار'))) {
+    const marketSection = {
+      id: newId(),
+      title: 'وضعیت بازار',
+      single: false,
+      options: [
+        { id: newId(), label: 'MACD', weight: 5, on: false },
+        { id: newId(), label: 'Minor Line', weight: 7.5, on: false },
+        { id: newId(), label: 'Major Line', weight: 10, on: false },
+        { id: newId(), label: 'Slope', weight: 5, on: false },
+      ],
+    }
+    const strategyIdx = scoreSections.findIndex((sec) => typeof sec.title === 'string' && sec.title.includes('استراتژی'))
+    if (strategyIdx >= 0) scoreSections.splice(strategyIdx, 0, marketSection)
+    else scoreSections.push(marketSection)
+    trading.scoreSections = scoreSections
+  }
 
   // --- برنامه: کارها و یادداشت ---
   const life = (s.life ?? {}) as Record<string, unknown>

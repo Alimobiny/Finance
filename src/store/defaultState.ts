@@ -117,6 +117,20 @@ export function createDefaultState(): RootState {
           ],
         },
         {
+          // بخش «وضعیت بازار» — طبق محاسبه‌گر IPS (۵_محاسبه‌گر_معامله). بدون این
+          // بخش (۲۷٫۵ امتیاز) حداکثر امتیاز ۴۷٫۵ می‌شد و آستانهٔ ۶۰ هرگز
+          // دست‌یافتنی نبود؛ یعنی همیشه «وارد نشو» نمایش داده می‌شد.
+          id: newId(),
+          title: 'وضعیت بازار',
+          single: false,
+          options: [
+            { id: newId(), label: 'MACD', weight: 5, on: false },
+            { id: newId(), label: 'Minor Line', weight: 7.5, on: false },
+            { id: newId(), label: 'Major Line', weight: 10, on: false },
+            { id: newId(), label: 'Slope', weight: 5, on: false },
+          ],
+        },
+        {
           id: newId(),
           title: 'استراتژی (یکی را انتخاب کن)',
           single: true,

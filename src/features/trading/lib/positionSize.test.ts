@@ -21,4 +21,11 @@ describe('computePositionSize', () => {
     expect(computePositionSize({ balanceUsd: 10000, riskPercent: 1, stopUsd: 0 }).lots).toBe(0)
     expect(computePositionSize({ balanceUsd: 10000, riskPercent: 1, stopUsd: -3 }).lots).toBe(0)
   })
+
+  // تطبیق دقیق با محاسبه‌گر IPS (فایل ۵_محاسبه‌گر_معامله.xlsx، سلول‌های D39/D40)
+  it('مثال محاسبه‌گر IPS: موجودی ۱۰٬۰۰۰، ریسک ۰٫۵٪، فاصله استاپ ۳$ → ریسک ۵۰$، حجم ۰٫۱۶۶۶…', () => {
+    const r = computePositionSize({ balanceUsd: 10000, riskPercent: 0.5, stopUsd: 3 })
+    expect(r.riskUsd).toBe(50)
+    expect(r.lots).toBeCloseTo(0.16666666666666666, 12)
+  })
 })
