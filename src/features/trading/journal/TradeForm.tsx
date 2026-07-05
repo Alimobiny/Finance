@@ -33,6 +33,7 @@ const EMPTY_FORM: NewTradeInput = {
   ticket: null,
   rr: '',
   r: null,
+  riskUsd: null,
   outcome: '',
   checklistFollowed: true,
   rule1Followed: true,
@@ -58,6 +59,7 @@ export function TradeForm() {
   const [form, setForm] = useState<NewTradeInput>(EMPTY_FORM)
   // متن خام فیلدهای عددی را جدا نگه می‌داریم تا تایپ «-» یا «1.» وسط کار به null تبدیل نشود.
   const [rText, setRText] = useState('')
+  const [riskUsdText, setRiskUsdText] = useState('')
   const [priceText, setPriceText] = useState(EMPTY_PRICES)
   const [imageBusy, setImageBusy] = useState(false)
 
@@ -69,6 +71,7 @@ export function TradeForm() {
       setForm(rest)
       setRText(rest.r != null && Number.isFinite(rest.r) ? String(rest.r) : '')
       const num = (v: number | null | undefined) => (v != null && Number.isFinite(v) ? String(v) : '')
+      setRiskUsdText(num(rest.riskUsd))
       setPriceText({ entry: num(rest.entry), stop: num(rest.stop), tp: num(rest.tp), exit: num(rest.exit) })
     }
   }, [editingTrade])
@@ -78,10 +81,13 @@ export function TradeForm() {
   const tpN = parsePriceInput(priceText.tp)
   const exitN = parsePriceInput(priceText.exit)
 
-  // معاملهٔ وارد‌شده از متاتریدر (سود واقعی دارد): R از سود ÷ «ریسک ثابت حساب» می‌آید،
-  // چون حد ضرر گزارش «آخرین» مقدار است و با سیو سود/ریسک‌فری/تریلینگ، R از قیمت غلط می‌شود.
+  // معاملهٔ دارای سود واقعی: R از سود ÷ ریسک می‌آید. ریسکِ واقعیِ همین معامله (اگر
+  // وارد شود) بر ریسکِ ثابتِ حساب مقدم است — چون ریسکِ هر معامله در عمل فرق می‌کند.
   const isImported = form.profit != null
-  const profitR = isImported ? rFromProfit(form.profit, activeRisk) : null
+  const riskUsdN = parsePriceInput(riskUsdText)
+  const effectiveRisk = riskUsdN ?? activeRisk
+  const usingTradeRisk = riskUsdN != null
+  const profitR = isImported ? rFromProfit(form.profit, effectiveRisk) : null
 
   // اگر قیمت‌ها کامل باشند، R و R:R خودکار و عینی محاسبه می‌شوند و بر ورودی دستی مقدم‌اند.
   const computedR = isImported ? profitR : computeRFromPrices(form.dir, entryN, stopN, exitN)
@@ -125,6 +131,7 @@ export function TradeForm() {
       exit: exitN,
       rr: rrValue,
       r: rNum, // همیشه عدد پاک یا null — هرگز NaN (از قیمت‌ها یا ورودی دستی)
+      riskUsd: riskUsdN,
       outcome: rLocked ? '' : form.outcome, // با R معتبر، نتیجه از R مشتق می‌شود
       date: form.date || faDateShort(new Date()),
       symbol: form.symbol.trim() || 'XAUUSD',
@@ -133,6 +140,7 @@ export function TradeForm() {
     else addTrade(payload)
     setForm(EMPTY_FORM)
     setRText('')
+    setRiskUsdText('')
     setPriceText(EMPTY_PRICES)
   }
 
@@ -160,6 +168,16 @@ export function TradeForm() {
           </Field>
           <Field label="ریسک٪">
             <input value={form.riskPercent} onChange={(e) => set('riskPercent', e.target.value)} placeholder="0.5" inputMode="decimal" style={{ ...inputStyle, direction: 'ltr', textAlign: 'left' }} />
+          </Field>
+          <Field label="ریسک واقعی ($)">
+            <input
+              value={riskUsdText}
+              onChange={(e) => setRiskUsdText(e.target.value)}
+              placeholder="مثلاً 50"
+              inputMode="decimal"
+              title="مبلغ دلاریِ واقعیِ ریسکِ همین معامله (لات × فاصلهٔ استاپِ اولیه). اگر پر شود، R از همین حساب می‌شود، نه ریسکِ ثابتِ حساب."
+              style={{ ...inputStyle, direction: 'ltr', textAlign: 'left' }}
+            />
           </Field>
           <Field label="قیمت ورود">
             <input value={priceText.entry} onChange={(e) => setPrice('entry', e.target.value)} placeholder="مثلاً 3450" inputMode="decimal" style={{ ...inputStyle, direction: 'ltr', textAlign: 'left' }} />
@@ -191,7 +209,7 @@ export function TradeForm() {
               readOnly={rFromPrices}
               placeholder="مثلاً 2 یا -1"
               inputMode="decimal"
-              title={rFromPrices ? (isImported ? 'از سود ÷ مبلغ ریسک حساب حساب شد' : 'از ورود/حدضرر/خروج حساب شد') : undefined}
+              title={rFromPrices ? (isImported ? `از سود ÷ ${usingTradeRisk ? 'ریسکِ واقعیِ معامله' : 'مبلغ ریسکِ ثابتِ حساب'} حساب شد` : 'از ورود/حدضرر/خروج حساب شد') : undefined}
               style={{ ...inputStyle, direction: 'ltr', textAlign: 'left', ...(rFromPrices ? lockedStyle : null) }}
             />
           </Field>
@@ -291,6 +309,7 @@ export function TradeForm() {
                 cancelEditTrade()
                 setForm(EMPTY_FORM)
                 setRText('')
+                setRiskUsdText('')
                 setPriceText(EMPTY_PRICES)
               }}
               style={{ border: '1px solid var(--border)', background: 'var(--surface)', cursor: 'pointer', borderRadius: 10, padding: '10px 18px', fontSize: 13, fontWeight: 600, color: 'var(--text-muted)' }}

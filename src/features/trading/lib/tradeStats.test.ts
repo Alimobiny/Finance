@@ -19,6 +19,7 @@ function makeTrade(over: Partial<Trade>): Trade {
     ticket: null,
     rr: '',
     r: null,
+    riskUsd: null,
     outcome: '',
     checklistFollowed: true,
     rule1Followed: true,

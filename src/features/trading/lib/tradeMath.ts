@@ -52,3 +52,11 @@ export function accountRiskAmount(a: { balance: number; riskPercent: number }): 
   const v = (a.balance * a.riskPercent) / 100
   return Number.isFinite(v) && v > 0 ? v : 0
 }
+
+/**
+ * مبلغ ریسکی که R بر مبنای آن حساب می‌شود: اگر «ریسکِ واقعیِ» همین معامله ثبت شده
+ * باشد (از EA یا دستی) همان اولویت دارد، وگرنه به ریسکِ ثابتِ حساب برمی‌گردیم.
+ */
+export function effectiveRiskAmount(tradeRiskUsd: Maybe, accountRisk: number): number {
+  return fin(tradeRiskUsd) && tradeRiskUsd > 0 ? tradeRiskUsd : accountRisk
+}

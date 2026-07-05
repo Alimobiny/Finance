@@ -3,7 +3,7 @@ import type { RootStore, Mutators } from '../rootStoreType'
 import { newId } from '../../lib/format/id'
 import { toPersianDigits } from '../../lib/format/number'
 import { recordChange } from '../history'
-import { accountRiskAmount, rFromProfit } from '../../features/trading/lib/tradeMath'
+import { accountRiskAmount, effectiveRiskAmount, rFromProfit } from '../../features/trading/lib/tradeMath'
 import type { ChecklistItem, PositionSizeInputs, ScoreOption, Trade, TradingAccount, TradingState } from '../../types'
 
 /** ورودی ثبت معامله؛ حساب به‌صورت خودکار «حساب فعال» می‌شود، پس accountId اینجا نیست. */
@@ -67,7 +67,10 @@ export const createTradingSlice = (
       if (patch.balance !== undefined || patch.riskPercent !== undefined) {
         const amount = accountRiskAmount(acc)
         for (const t of s.trading.trades) {
-          if (t.accountId === id && t.profit != null) t.r = rFromProfit(t.profit, amount)
+          // معاملاتی که «ریسکِ واقعیِ خودشان» را دارند با تغییر حساب دست نمی‌خورند.
+          if (t.accountId === id && t.profit != null && !(t.riskUsd != null && t.riskUsd > 0)) {
+            t.r = rFromProfit(t.profit, amount)
+          }
         }
       }
     }),
@@ -108,8 +111,8 @@ export const createTradingSlice = (
           continue
         }
         if (input.ticket) seen.add(input.ticket)
-        // R از روی سود واقعی ÷ ریسک ثابت حساب (اگر ریسک هنوز صفر باشد، بعداً با تنظیمش پر می‌شود).
-        const r = input.profit != null ? rFromProfit(input.profit, risk) : input.r
+        // R از روی سود واقعی ÷ ریسکِ مؤثر (ریسکِ واقعیِ معامله اگر بود، وگرنه ریسکِ ثابتِ حساب).
+        const r = input.profit != null ? rFromProfit(input.profit, effectiveRiskAmount(input.riskUsd, risk)) : input.r
         s.trading.trades.unshift({ id: newId(), accountId: accId, ...input, r })
         added++
       }

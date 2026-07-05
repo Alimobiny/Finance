@@ -43,6 +43,7 @@ export function normalizeState(input: RootState): RootState {
   for (const t of trades) {
     if (!t.accountId || !accountIds.has(t.accountId)) t.accountId = activeId
     if (t.profit === undefined) t.profit = null
+    if (t.riskUsd === undefined) t.riskUsd = null
   }
   trading.trades = trades
 

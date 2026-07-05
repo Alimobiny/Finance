@@ -75,6 +75,10 @@ export interface Trade {
   ticket: string | null
   rr: string
   r: number | null
+  /** ریسکِ واقعیِ دلاریِ همین معامله (از EA متاتریدر یا ثبت دستی). اگر معتبر باشد،
+   *  R = سود ÷ این مقدار — به‌جای ریسکِ ثابتِ حساب. چون ریسکِ واقعیِ هر معامله با
+   *  استاپ/لاتِ لحظهٔ ورود فرق می‌کند و با تریل‌استاپ فقط از لحظهٔ ورود معلوم است. */
+  riskUsd: number | null
   outcome: TradeOutcome
   checklistFollowed: boolean
   rule1Followed: boolean

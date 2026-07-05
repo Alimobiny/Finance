@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { parsePriceInput, computeRFromPrices, computePlannedRR, rFromProfit, accountRiskAmount } from './tradeMath'
+import { parsePriceInput, computeRFromPrices, computePlannedRR, rFromProfit, accountRiskAmount, effectiveRiskAmount } from './tradeMath'
 
 describe('parsePriceInput', () => {
   it('عدد اعشاری معتبر را می‌خواند', () => {
@@ -78,5 +78,22 @@ describe('accountRiskAmount', () => {
   it('موجودی صفر یا مقدار نامعتبر → صفر', () => {
     expect(accountRiskAmount({ balance: 0, riskPercent: 1 })).toBe(0)
     expect(accountRiskAmount({ balance: -100, riskPercent: 1 })).toBe(0)
+  })
+})
+
+describe('effectiveRiskAmount', () => {
+  it('ریسکِ واقعیِ معامله (اگر معتبر) بر ریسکِ ثابتِ حساب مقدم است', () => {
+    expect(effectiveRiskAmount(80, 50)).toBe(80)
+  })
+
+  it('اگر ریسکِ واقعی نبود/نامعتبر بود، به ریسکِ حساب برمی‌گردد', () => {
+    expect(effectiveRiskAmount(null, 50)).toBe(50)
+    expect(effectiveRiskAmount(undefined, 50)).toBe(50)
+    expect(effectiveRiskAmount(0, 50)).toBe(50)
+    expect(effectiveRiskAmount(-10, 50)).toBe(50)
+  })
+
+  it('R نهایی با ریسکِ واقعی: سود ۱۶۰ ÷ ریسکِ واقعی ۸۰ → ۲ (مستقل از حساب)', () => {
+    expect(rFromProfit(160, effectiveRiskAmount(80, 50))).toBe(2)
   })
 })

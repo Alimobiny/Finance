@@ -57,10 +57,13 @@ export function TradesTable({ trades }: { trades: Trade[] }) {
                   <span style={{ fontSize: 11, fontWeight: 700, borderRadius: 6, padding: '3px 9px', background: outStyle.bg, color: outStyle.color }}>{OUTCOME_LABEL[outcome]}</span>
                 </td>
                 <td style={{ padding: '10px 12px' }}>
-                  {t.riskPercent ? (
+                  {t.riskUsd != null && t.riskUsd > 0 ? (
+                    // ریسکِ واقعیِ ثبت‌شدهٔ همین معامله (مبنای R این معامله).
+                    <span style={{ direction: 'ltr', unicodeBidi: 'isolate', fontWeight: 600 }}>{`$${faNumber(t.riskUsd, Number.isInteger(t.riskUsd) ? 0 : 2)}`}</span>
+                  ) : t.riskPercent ? (
                     `${t.riskPercent}٪`
                   ) : (
-                    // معاملهٔ واردشده: درصدِ هر معامله در گزارش نیست؛ مبلغ ریسکِ ثابتِ حساب (مبنای R) را نشان می‌دهیم.
+                    // نه ریسکِ واقعی دارد نه درصدِ دستی → مبلغ ریسکِ ثابتِ حساب (مبنای fallback برای R).
                     <span style={{ direction: 'ltr', unicodeBidi: 'isolate', color: 'var(--text-muted)' }}>{riskAmountLabel}</span>
                   )}
                 </td>
