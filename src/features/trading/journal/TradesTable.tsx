@@ -2,6 +2,8 @@ import type { Trade } from '../../../types'
 import { useRootStore } from '../../../store/rootStore'
 import { useSoftDelete } from '../../../lib/useSoftDelete'
 import { hasR, resolveOutcome } from '../lib/tradeOutcome'
+import { accountRiskAmount } from '../lib/tradeMath'
+import { faNumber } from '../../../lib/format/number'
 
 const OUTCOME_LABEL: Record<string, string> = { win: 'برد', loss: 'باخت', be: 'سربه‌سر', '': '—' }
 const OUTCOME_STYLE: Record<string, { bg: string; color: string }> = {
@@ -21,6 +23,12 @@ export function TradesTable({ trades }: { trades: Trade[] }) {
   const startEditTrade = useRootStore((s) => s.startEditTrade)
   const softDelete = useSoftDelete()
   const addTradeBack = useRootStore((s) => s.addTrade)
+
+  // جدول فقط معاملاتِ حساب فعال را نشان می‌دهد؛ مبلغ ریسکِ همان حساب مبنای R است.
+  const accounts = useRootStore((s) => s.trading.accounts)
+  const activeId = useRootStore((s) => s.trading.activeAccountId)
+  const riskAmount = accountRiskAmount(accounts.find((a) => a.id === activeId) ?? { balance: 0, riskPercent: 0 })
+  const riskAmountLabel = riskAmount > 0 ? `$${faNumber(riskAmount, Number.isInteger(riskAmount) ? 0 : 2)}` : '—'
 
   if (trades.length === 0) return null
 
@@ -48,7 +56,14 @@ export function TradesTable({ trades }: { trades: Trade[] }) {
                 <td style={{ padding: '10px 12px' }}>
                   <span style={{ fontSize: 11, fontWeight: 700, borderRadius: 6, padding: '3px 9px', background: outStyle.bg, color: outStyle.color }}>{OUTCOME_LABEL[outcome]}</span>
                 </td>
-                <td style={{ padding: '10px 12px' }}>{t.riskPercent ? `${t.riskPercent}٪` : '—'}</td>
+                <td style={{ padding: '10px 12px' }}>
+                  {t.riskPercent ? (
+                    `${t.riskPercent}٪`
+                  ) : (
+                    // معاملهٔ واردشده: درصدِ هر معامله در گزارش نیست؛ مبلغ ریسکِ ثابتِ حساب (مبنای R) را نشان می‌دهیم.
+                    <span style={{ direction: 'ltr', unicodeBidi: 'isolate', color: 'var(--text-muted)' }}>{riskAmountLabel}</span>
+                  )}
+                </td>
                 <td style={{ padding: '10px 12px' }}>{t.rr || '—'}</td>
                 <td style={{ padding: '10px 12px', fontWeight: 800, color: !hasR(t) ? 'var(--text-quiet)' : t.r! > 0 ? 'var(--accent-green)' : t.r! < 0 ? 'var(--accent-red-strong)' : 'var(--text)' }}>
                   {!hasR(t) ? '—' : `${t.r! > 0 ? '+' : ''}${t.r}`}

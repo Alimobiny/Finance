@@ -38,6 +38,19 @@ function num(raw: string | undefined): number | null {
 
 const round2 = (v: number) => Math.round(v * 100) / 100
 
+/** سقفِ منطقی برای R:R واردشده؛ بالاتر از این تقریباً همیشه آرتیفکتِ استاپِ تریل‌شده است. */
+const MAX_SANE_RR = 10
+
+/**
+ * R:R را از قیمت‌های گزارش حساب می‌کند، اما چون حدضرر گزارش «آخرین» (تریل‌شده) است،
+ * اگر تریل نزدیک ورود باشد R:R به‌شکل کاذب بزرگ می‌شود. برای همین فقط مقدار منطقی
+ * (≤۱۰) را برمی‌گردانیم و بقیه را null می‌گذاریم — همان‌طور که R هم از این حدضرر حساب نمی‌شود.
+ */
+export function sanePlannedRR(entry: number | null, stop: number | null, tp: number | null): number | null {
+  const rr = computePlannedRR(entry, stop, tp)
+  return rr != null && rr <= MAX_SANE_RR ? rr : null
+}
+
 /** «2026.07.03 10:15:30» → Date؛ اگر نشد null. */
 function parseMtDate(raw: string | undefined): Date | null {
   if (!raw) return null
@@ -115,8 +128,8 @@ export function parseMt5Html(html: string): Mt5ParseResult {
     // برای همین R را از قیمت حساب نمی‌کنیم و فقط برای اطلاع ذخیره‌اش می‌کنیم.
     const stop = slRaw && slRaw !== 0 ? slRaw : null
     const tp = tpRaw && tpRaw !== 0 ? tpRaw : null
-    // نسبت R:R از ورود/حدضرر/حدسودِ گزارش (اگر تنظیم شده باشند).
-    const rr = computePlannedRR(entry, stop, tp)
+    // نسبت R:R از ورود/حدضرر/حدسودِ گزارش، با سقفِ منطقی (نگاه کن به sanePlannedRR).
+    const rr = sanePlannedRR(entry, stop, tp)
 
     // سود/زیان خالص = Profit + Swap + Commission (سه ستون آخر) به دلار.
     const gross = num(cells[cells.length - 1])
