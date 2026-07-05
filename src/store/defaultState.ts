@@ -131,9 +131,11 @@ export function createDefaultState(): RootState {
           ],
         },
         {
+          // چندانتخابی و جمع‌شونده — طبق Plan Trade3 و محاسبه‌گر IPS، یک ست‌آپ
+          // می‌تواند چند معیار استراتژی را هم‌زمان برآورده کند و وزن‌ها جمع می‌شوند.
           id: newId(),
-          title: 'استراتژی (یکی را انتخاب کن)',
-          single: true,
+          title: 'استراتژی',
+          single: false,
           options: [
             { id: newId(), label: 'Miner-EOW', weight: 5, on: false },
             { id: newId(), label: 'Miner-EOC', weight: 15, on: false },

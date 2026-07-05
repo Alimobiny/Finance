@@ -37,52 +37,40 @@ describe('totalScore', () => {
   })
 })
 
-describe('scoreVerdict', () => {
+describe('scoreVerdict (سه‌تیری)', () => {
   const threshold = 50
-  it('آستانه+۲۰ به بالا → کیفیت بالا', () => {
-    expect(scoreVerdict(70, threshold).label).toBe('ورود مجاز — کیفیت بالا')
+  it('آستانه+۲۰ به بالا → GOOD', () => {
+    expect(scoreVerdict(70, threshold).label).toContain('GOOD')
   })
-  it('آستانه+۱۰ تا +۲۰ → معمولی', () => {
-    expect(scoreVerdict(60, threshold).label).toBe('ورود مجاز — معمولی')
+  it('آستانه+۱۰ تا +۲۰ → Normal', () => {
+    expect(scoreVerdict(60, threshold).label).toContain('Normal')
   })
-  it('بین آستانه و آستانه+۱۰ → با احتیاط', () => {
-    expect(scoreVerdict(55, threshold).label).toBe('ورود با احتیاط')
-  })
-  it('زیر آستانه → وارد نشو', () => {
-    expect(scoreVerdict(49, threshold).label).toBe('وارد نشو — کیفیت پایین')
+  it('زیر آستانه+۱۰ → Risky (بدون تیر چهارم)', () => {
+    expect(scoreVerdict(59, threshold).label).toContain('Risky')
+    expect(scoreVerdict(40, threshold).label).toContain('Risky')
   })
 })
 
-// تطبیق دقیق با محاسبه‌گر IPS: آستانهٔ ۶۰ و همان مرزها/برچسب‌های IF اکسل (۸۰/۷۰/۶۰)
-describe('مطابقت با محاسبه‌گر IPS (آستانهٔ ۶۰)', () => {
+// تطبیق دقیق با Plan Trade3 (Khalagh Academy): تصمیم سه‌تیری با آستانهٔ ۶۰
+describe('مطابقت با Plan Trade3 (آستانهٔ ۶۰)', () => {
   const T = 60
 
-  it('مرزهای تصمیم دقیقاً مثل IF اکسل', () => {
-    expect(scoreVerdict(80, T).label).toBe('ورود مجاز — کیفیت بالا')
-    expect(scoreVerdict(70, T).label).toBe('ورود مجاز — معمولی')
-    expect(scoreVerdict(60, T).label).toBe('ورود با احتیاط')
-    expect(scoreVerdict(59, T).label).toBe('وارد نشو — کیفیت پایین')
+  it('مرزها: ≥۸۰ GOOD، ≥۷۰ Normal، زیر ۷۰ Risky', () => {
+    expect(scoreVerdict(80, T).label).toContain('GOOD')
+    expect(scoreVerdict(70, T).label).toContain('Normal')
+    expect(scoreVerdict(69, T).label).toContain('Risky')
+    expect(scoreVerdict(60, T).label).toContain('Risky')
   })
 
-  it('مثال اکسل: تحلیل ۱۷٫۵ + روند ۱۵ + وضعیت بازار ۲۷٫۵ + استراتژی ۰ = ۶۰ → با احتیاط', () => {
+  it('مثال دقیق Plan Trade3: تحلیل ۱۷٫۵ + روند ۱۰ + وضعیت ۲۰ + استراتژی ۳۵ = ۸۲٫۵ → GOOD', () => {
     const sections = [
       section(false, [{ weight: 6.25, on: true }, { weight: 5, on: true }, { weight: 3.75, on: true }, { weight: 2.5, on: true }]), // 17.5
-      section(false, [{ weight: 5, on: true }, { weight: 5, on: true }, { weight: 5, on: true }]), // 15
-      section(false, [{ weight: 5, on: true }, { weight: 7.5, on: true }, { weight: 10, on: true }, { weight: 5, on: true }]), // 27.5 (وضعیت بازار)
-      section(true, [{ weight: 5, on: false }, { weight: 15, on: false }, { weight: 5, on: false }, { weight: 15, on: false }, { weight: 10, on: false }]), // 0
+      section(false, [{ weight: 5, on: true }, { weight: 5, on: false }, { weight: 5, on: true }]), // 10 (۵min خاموش)
+      section(false, [{ weight: 5, on: true }, { weight: 7.5, on: false }, { weight: 10, on: true }, { weight: 5, on: true }]), // 20 (Minor خاموش)
+      // استراتژی چندانتخابی و جمع‌شونده: EOW+EOC+EOW+ACD روشن، PA-EOC خاموش = 35
+      section(false, [{ weight: 5, on: true }, { weight: 15, on: true }, { weight: 5, on: true }, { weight: 15, on: false }, { weight: 10, on: true }]), // 35
     ]
-    expect(totalScore(sections)).toBe(60)
-    expect(scoreVerdict(totalScore(sections), T).label).toBe('ورود با احتیاط')
-  })
-
-  it('با استراتژی فعال، حداکثر امتیاز از آستانه عبور می‌کند (۴ بخش کامل)', () => {
-    const sections = [
-      section(false, [{ weight: 6.25, on: true }, { weight: 5, on: true }, { weight: 3.75, on: true }, { weight: 2.5, on: true }]), // 17.5
-      section(false, [{ weight: 5, on: true }, { weight: 5, on: true }, { weight: 5, on: true }]), // 15
-      section(false, [{ weight: 5, on: true }, { weight: 7.5, on: true }, { weight: 10, on: true }, { weight: 5, on: true }]), // 27.5
-      section(true, [{ weight: 15, on: true }]), // 15 → جمع ۷۵
-    ]
-    expect(totalScore(sections)).toBe(75)
-    expect(scoreVerdict(75, T).label).toBe('ورود مجاز — معمولی')
+    expect(totalScore(sections)).toBe(82.5)
+    expect(scoreVerdict(82.5, T).label).toContain('GOOD')
   })
 })

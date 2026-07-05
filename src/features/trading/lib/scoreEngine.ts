@@ -21,9 +21,13 @@ export interface ScoreVerdict {
   bg: string
 }
 
+/**
+ * تصمیم ورود سه‌تیری طبق Plan Trade3 (Khalagh Academy): با آستانهٔ ۶۰،
+ * ≥۸۰ خوب، ≥۷۰ معمولی، زیر ۷۰ پرریسک. مرزها نسبت به آستانه پارامتری‌اند
+ * (آستانه+۲۰ و آستانه+۱۰) تا با تغییر آستانه هم درست بمانند.
+ */
 export function scoreVerdict(total: number, threshold: number): ScoreVerdict {
-  if (total >= threshold + 20) return { label: 'ورود مجاز — کیفیت بالا', color: 'var(--accent-green)', bg: 'var(--accent-green-soft)' }
-  if (total >= threshold + 10) return { label: 'ورود مجاز — معمولی', color: 'var(--accent-teal)', bg: 'var(--accent-green-soft)' }
-  if (total >= threshold) return { label: 'ورود با احتیاط', color: '#7D6608', bg: '#FEFBF0' }
-  return { label: 'وارد نشو — کیفیت پایین', color: 'var(--accent-red-strong)', bg: 'var(--accent-red-soft)' }
+  if (total >= threshold + 20) return { label: 'ورود مجاز — کیفیت بالا (GOOD)', color: 'var(--accent-green)', bg: 'var(--accent-green-soft)' }
+  if (total >= threshold + 10) return { label: 'ورود مجاز — معمولی (Normal)', color: 'var(--accent-teal)', bg: 'var(--accent-green-soft)' }
+  return { label: 'پرریسک — ورود پرخطر (Risky)', color: 'var(--accent-red-strong)', bg: 'var(--accent-red-soft)' }
 }

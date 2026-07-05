@@ -15,14 +15,30 @@ function stateWithSections(titles: string[]): RootState {
 }
 
 describe('normalizeState — مهاجرت بخش «وضعیت بازار»', () => {
-  it('بخش جا‌افتاده را قبل از «استراتژی» تزریق می‌کند', () => {
+  it('بخش جا‌افتاده را قبل از «استراتژی» تزریق می‌کند و عنوان استراتژی را اصلاح می‌کند', () => {
     const out = normalizeState(stateWithSections(['تحلیل تایم‌فریم', 'جفت روند', 'استراتژی (یکی را انتخاب کن)']))
     const titles = out.trading.scoreSections.map((s) => s.title)
-    expect(titles).toEqual(['تحلیل تایم‌فریم', 'جفت روند', 'وضعیت بازار', 'استراتژی (یکی را انتخاب کن)'])
+    expect(titles).toEqual(['تحلیل تایم‌فریم', 'جفت روند', 'وضعیت بازار', 'استراتژی'])
 
-    // وزن‌های بخش طبق محاسبه‌گر IPS
+    // وزن‌های بخش طبق محاسبه‌گر IPS / Plan Trade3
     const market = out.trading.scoreSections.find((s) => s.title === 'وضعیت بازار')
     expect(market?.options.map((o) => o.weight)).toEqual([5, 7.5, 10, 5])
+  })
+
+  it('استراتژیِ تک‌انتخابیِ نسخهٔ قبلی را به چندانتخابی تبدیل می‌کند', () => {
+    const input = {
+      trading: {
+        accounts: [{ id: 'a', name: 'حساب', balance: 0, riskPercent: 1 }],
+        activeAccountId: 'a',
+        trades: [],
+        scoreSections: [
+          { id: 's1', title: 'وضعیت بازار', single: false, options: [] },
+          { id: 's2', title: 'استراتژی (یکی را انتخاب کن)', single: true, options: [] },
+        ],
+      },
+    } as unknown as RootState
+    const strat = normalizeState(input).trading.scoreSections.find((s) => s.title === 'استراتژی')
+    expect(strat?.single).toBe(false)
   })
 
   it('idempotent است — اجرای دوباره بخش تکراری اضافه نمی‌کند', () => {
