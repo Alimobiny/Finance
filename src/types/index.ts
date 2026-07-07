@@ -214,6 +214,8 @@ export interface SettingsState {
   symbols: TextListItem[]
   emotions: TextListItem[]
   lastSyncedAt: string | null
+  /** URLِ منبعِ خودکارِ معاملات (خروجیِ Apps Script که EA به آن می‌نویسد). خالی = غیرفعال. */
+  autoImportUrl: string
 }
 
 // ==================== تاریخچهٔ تغییرات ====================

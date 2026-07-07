@@ -86,6 +86,11 @@ export function normalizeState(input: RootState): RootState {
   if (!Array.isArray(life.tasks)) life.tasks = []
   if (typeof life.notes !== 'string') life.notes = ''
 
+  // --- تنظیمات: URL منبعِ خودکارِ معاملات ---
+  const settings = (s.settings ?? {}) as Record<string, unknown>
+  if (typeof settings.autoImportUrl !== 'string') settings.autoImportUrl = ''
+  s.settings = settings
+
   // --- تاریخچهٔ تغییرات ---
   const history = (s.history ?? {}) as Record<string, unknown>
   if (!Array.isArray(history.entries)) history.entries = []

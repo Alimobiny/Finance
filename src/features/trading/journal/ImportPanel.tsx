@@ -4,6 +4,7 @@ import { faNumber } from '../../../lib/format/number'
 import { accountRiskAmount } from '../lib/tradeMath'
 import { decodeReport, parseMt5Html, type ParsedTrade } from '../lib/importMt5'
 import { looksLikeEaJson, parseEaJson } from '../lib/importEaJson'
+import { fetchAndImport } from '../lib/autoImport'
 
 type Stage =
   | { kind: 'idle' }
@@ -18,8 +19,30 @@ export function ImportPanel() {
   const accounts = useRootStore((s) => s.trading.accounts)
   const activeAccountId = useRootStore((s) => s.trading.activeAccountId)
   const activeAccount = accounts.find((a) => a.id === activeAccountId)
+  const autoImportUrl = useRootStore((s) => s.settings.autoImportUrl)
+  const setAutoImportUrl = useRootStore((s) => s.setAutoImportUrl)
   const [open, setOpen] = useState(false)
   const [stage, setStage] = useState<Stage>({ kind: 'idle' })
+  const [autoBusy, setAutoBusy] = useState(false)
+  const [autoMsg, setAutoMsg] = useState('')
+
+  async function syncNow() {
+    if (!autoImportUrl || autoBusy) return
+    setAutoBusy(true)
+    setAutoMsg('')
+    try {
+      const { added, skipped } = await fetchAndImport(autoImportUrl, importTrades)
+      setAutoMsg(
+        added > 0
+          ? `✓ ${toFa(added)} معاملهٔ جدید اضافه شد${skipped ? ` · ${toFa(skipped)} تکراری رد شد` : ''}.`
+          : 'چیز جدیدی نبود (همهٔ معاملات از قبل ثبت شده‌اند).',
+      )
+    } catch {
+      setAutoMsg('دریافت از منبع ناموفق بود. آدرس یا دسترسیِ Apps Script را بررسی کن.')
+    } finally {
+      setAutoBusy(false)
+    }
+  }
 
   async function onFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -79,6 +102,31 @@ export function ImportPanel() {
             📄 انتخاب فایل گزارش (HTML یا JSON)
             <input type="file" accept=".html,.htm,.json,text/html,application/json" onChange={onFile} style={{ display: 'none' }} />
           </label>
+
+          {/* اتصالِ خودکار: بدون فایل، از URLِ Apps Scriptِ متصل به EA */}
+          <div style={{ marginTop: 14, paddingTop: 13, borderTop: '1px dashed var(--border)' }}>
+            <div style={{ fontSize: 12.5, fontWeight: 700, marginBottom: 5 }}>یا اتصالِ خودکار (بدون فایل)</div>
+            <div style={{ fontSize: 11.5, color: 'var(--text-faint)', lineHeight: 1.7, marginBottom: 9 }}>
+              اگر EA را به یک Google Apps Script وصل کرده‌ای، آدرسِ آن (GET) را این‌جا بگذار. اپ هر بار که باز شود و با دکمهٔ زیر، خودکار معاملاتِ جدید را می‌آورد.
+            </div>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <input
+                value={autoImportUrl}
+                onChange={(e) => setAutoImportUrl(e.target.value)}
+                placeholder="https://script.google.com/macros/s/…/exec"
+                style={{ flex: 1, minWidth: 220, border: '1px solid var(--border)', borderRadius: 9, padding: '8px 10px', fontSize: 12, direction: 'ltr', textAlign: 'left', background: 'var(--surface-muted)', outline: 'none' }}
+              />
+              <button
+                type="button"
+                onClick={syncNow}
+                disabled={!autoImportUrl || autoBusy}
+                style={{ border: 'none', cursor: autoImportUrl && !autoBusy ? 'pointer' : 'not-allowed', background: autoImportUrl && !autoBusy ? 'var(--accent-navy)' : 'var(--border-strong)', color: '#fff', borderRadius: 9, padding: '8px 16px', fontSize: 12.5, fontWeight: 700, whiteSpace: 'nowrap' }}
+              >
+                {autoBusy ? 'در حال دریافت…' : 'همگام‌سازی الان'}
+              </button>
+            </div>
+            {autoMsg && <div style={{ marginTop: 8, fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.6 }}>{autoMsg}</div>}
+          </div>
 
           {stage.kind === 'error' && (
             <div style={{ marginTop: 11, fontSize: 12, color: 'var(--accent-red-strong)', fontWeight: 600, lineHeight: 1.6 }}>{stage.msg}</div>

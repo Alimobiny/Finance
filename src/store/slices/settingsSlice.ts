@@ -17,6 +17,7 @@ export interface SettingsSlice {
   restoreEmotion: (item: TextListItem, index: number) => void
 
   setLastSyncedAt: (iso: string | null) => void
+  setAutoImportUrl: (url: string) => void
 }
 
 export const createSettingsSlice = (
@@ -61,5 +62,9 @@ export const createSettingsSlice = (
   setLastSyncedAt: (iso) =>
     set((s) => {
       s.settings.lastSyncedAt = iso
+    }),
+  setAutoImportUrl: (url) =>
+    set((s) => {
+      s.settings.autoImportUrl = url.trim()
     }),
 })

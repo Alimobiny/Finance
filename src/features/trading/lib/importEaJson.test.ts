@@ -66,6 +66,13 @@ describe('parseEaJson', () => {
     expect(parseEaJson('not json').trades).toHaveLength(0)
   })
 
+  it('آبجکتِ تکِ یک معامله (فقط یک معامله ثبت‌شده) را هم می‌خواند', () => {
+    const single = JSON.stringify({ ticket: 9, symbol: 'XAUUSD', type: 'buy', openPrice: 2400, closePrice: 2410, profit: 50, riskUsd: 100 })
+    const { trades } = parseEaJson(single)
+    expect(trades).toHaveLength(1)
+    expect(trades[0].input.riskUsd).toBe(100)
+  })
+
   it('فرمتِ JSONL (هر خط یک آبجکت) را هم می‌خواند — خروجیِ append‌شدهٔ EA', () => {
     const jsonl =
       '{"ticket":1,"symbol":"XAUUSD","type":"buy","openPrice":2400,"initialSL":2397,"closePrice":2415,"profit":75,"riskUsd":300}\n' +

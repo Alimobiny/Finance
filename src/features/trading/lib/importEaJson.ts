@@ -24,11 +24,6 @@ interface EaTrade {
   riskUsd?: number
 }
 
-interface EaFile {
-  source?: string
-  trades?: EaTrade[]
-}
-
 const round2 = (v: number) => Math.round(v * 100) / 100
 const fin = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v)
 
@@ -61,22 +56,30 @@ function parseJsonl(text: string): EaTrade[] {
   return out
 }
 
+/** دادهٔ پارس‌شده را به آرایه‌ای از رکوردها تبدیل می‌کند: آرایه، یا {trades:[]}، یا یک آبجکتِ تکِ معامله. */
+function asRows(data: unknown): EaTrade[] {
+  if (Array.isArray(data)) return data as EaTrade[]
+  if (data && typeof data === 'object') {
+    const obj = data as Record<string, unknown>
+    if (Array.isArray(obj.trades)) return obj.trades as EaTrade[]
+    // فایل/خطِ تکِ یک معامله (مثلاً وقتی فقط یک معامله ثبت شده)
+    if ('openPrice' in obj || 'type' in obj || 'ticket' in obj) return [obj as EaTrade]
+  }
+  return []
+}
+
 export function parseEaJson(text: string): Mt5ParseResult {
   let data: unknown
   try {
     data = JSON.parse(text)
   } catch {
-    // شاید JSONL باشد (خروجیِ append‌شدهٔ EA)
+    // شاید JSONL باشد (خروجیِ append‌شدهٔ EA، چند خط)
     const fromLines = parseJsonl(text)
     if (fromLines.length === 0) return { trades: [], skipped: 0 }
     data = fromLines
   }
 
-  const rows: EaTrade[] = Array.isArray(data)
-    ? (data as EaTrade[])
-    : Array.isArray((data as EaFile)?.trades)
-      ? (data as EaFile).trades!
-      : []
+  const rows: EaTrade[] = asRows(data)
 
   const trades: ParsedTrade[] = []
   let skipped = 0
