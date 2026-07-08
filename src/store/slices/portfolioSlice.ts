@@ -4,8 +4,7 @@ import { newId } from '../../lib/format/id'
 import { addTextItem, insertTextItem, removeTextItem, updateTextItem } from '../listHelpers'
 import { recordChange } from '../history'
 import type { Holding, HoldingSub, PortfolioState, PriceKey, TextListItem } from '../../types'
-
-const PALETTE = ['#B0832B', '#3E6B5A', '#5B6BA8', '#2C7A6B', '#8C5A8C', '#9A6B1E', '#1A5276', '#8C3A3A']
+import { PORTFOLIO_PALETTE, standardBaskets } from '../portfolioSeed'
 
 export interface PortfolioSlice {
   portfolio: PortfolioState
@@ -14,6 +13,12 @@ export interface PortfolioSlice {
   updateHolding: (id: string, patch: Partial<Pick<Holding, 'name' | 'layer' | 'role' | 'target'>>) => void
   removeHolding: (id: string) => void
   restoreHolding: (item: Holding, index: number) => void
+  setHoldingTarget: (id: string, target: number) => void
+  applyAllocationPreset: (presetId: string) => void
+  saveAllocationPreset: (name: string) => void
+  removeAllocationPreset: (id: string) => void
+  addStandardBaskets: () => void
+  normalizeTargetsTo100: () => void
   addManualSub: (holdingId: string) => void
   addLinkedSub: (holdingId: string) => void
   updateSubName: (holdingId: string, subId: string, name: string) => void
@@ -37,7 +42,7 @@ export const createPortfolioSlice = (
 
   addHolding: () =>
     set((s) => {
-      const color = PALETTE[s.portfolio.holdings.length % PALETTE.length]
+      const color = PORTFOLIO_PALETTE[s.portfolio.holdings.length % PORTFOLIO_PALETTE.length]
       s.portfolio.holdings.push({ id: newId(), name: 'دارایی جدید', layer: 'سایر', role: '', target: 0, color, subs: [] })
       recordChange(s, 'add', 'پرتفولیو', 'افزودن دارایی جدید')
     }),
@@ -55,6 +60,49 @@ export const createPortfolioSlice = (
   restoreHolding: (item, index) =>
     set((s) => {
       s.portfolio.holdings.splice(Math.min(index, s.portfolio.holdings.length), 0, item)
+    }),
+  setHoldingTarget: (id, target) =>
+    set((s) => {
+      const h = s.portfolio.holdings.find((x) => x.id === id)
+      if (h) h.target = Number.isFinite(target) && target >= 0 ? target : 0
+    }),
+  applyAllocationPreset: (presetId) =>
+    set((s) => {
+      const preset = s.portfolio.allocationPresets.find((p) => p.id === presetId)
+      if (!preset) return
+      for (const h of s.portfolio.holdings) {
+        const w = preset.weights.find((x) => x.category === h.name.trim())
+        h.target = w ? w.target : 0
+      }
+      recordChange(s, 'edit', 'پرتفولیو', `اعمال سبدِ الگو «${preset.name}»`)
+    }),
+  saveAllocationPreset: (name) =>
+    set((s) => {
+      const weights = s.portfolio.holdings
+        .filter((h) => h.target > 0)
+        .map((h) => ({ category: h.name.trim(), target: h.target }))
+      const label = name.trim() || 'سبدِ من'
+      s.portfolio.allocationPresets.push({ id: newId(), name: label, weights })
+      recordChange(s, 'add', 'پرتفولیو', `ذخیرهٔ سبدِ الگو «${label}»`)
+    }),
+  removeAllocationPreset: (id) =>
+    set((s) => {
+      s.portfolio.allocationPresets = s.portfolio.allocationPresets.filter((p) => p.id !== id)
+    }),
+  addStandardBaskets: () =>
+    set((s) => {
+      const existing = new Set(s.portfolio.holdings.map((h) => h.name.trim()))
+      const toAdd = standardBaskets().filter((b) => !existing.has(b.name))
+      s.portfolio.holdings.push(...toAdd)
+      if (toAdd.length) recordChange(s, 'add', 'پرتفولیو', `افزودن ${toAdd.length} دستهٔ استاندارد`)
+    }),
+  normalizeTargetsTo100: () =>
+    set((s) => {
+      const sum = s.portfolio.holdings.reduce((t, h) => t + (Number.isFinite(h.target) ? h.target : 0), 0)
+      if (sum <= 0) return
+      for (const h of s.portfolio.holdings) {
+        h.target = Math.round(((Number.isFinite(h.target) ? h.target : 0) / sum) * 1000) / 10
+      }
     }),
   addManualSub: (holdingId) =>
     set((s) => {

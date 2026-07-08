@@ -42,12 +42,22 @@ export interface Holding {
   subs: HoldingSub[]
 }
 
+/** یک «سبدِ الگو» — مجموعه‌ای از درصدهای هدف که با یک کلیک روی دسته‌ها اعمال می‌شود (کم‌ریسک/دفاعی/جنگی) */
+export interface AllocationPreset {
+  id: string
+  name: string
+  /** درصدِ هدفِ هر دسته، با کلیدِ نامِ دسته (هم‌راستا با نامِ Holding) */
+  weights: { category: string; target: number }[]
+}
+
 export interface PortfolioState {
   holdings: Holding[]
   prices: Record<PriceKey, number>
   pricesUpdatedAt: string | null
   /** یادداشت‌های تعادل قابل‌ویرایش کاربر (جدا از پیشنهاد خودکار محاسبه‌شده) */
   rebalanceNotes: TextListItem[]
+  /** سبدهای الگوی تخصیص (پیش‌فرض: کم‌ریسک/دفاعی/جنگی از اکسلِ حسابرسی) */
+  allocationPresets: AllocationPreset[]
 }
 
 // ==================== معاملات ====================

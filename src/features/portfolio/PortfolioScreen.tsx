@@ -5,6 +5,7 @@ import { Card } from '../../components/ui/Card'
 import { EditableTextList } from '../../components/ui/EditableTextList'
 import { HoldingRow } from './HoldingRow'
 import { PricePanel } from './PricePanel'
+import { AllocationPanel } from './AllocationPanel'
 import { AssetDonut } from '../../components/ui/AssetDonut'
 import { faMoney, faPercent } from '../../lib/format/number'
 import { holdingValue, portfolioTotal } from './lib/computeHoldingValue'
@@ -74,6 +75,8 @@ export function PortfolioScreen() {
       )}
 
       <PricePanel />
+
+      <AllocationPanel />
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap', marginBottom: 11 }}>
         <div style={{ fontSize: 12.5, color: 'var(--text-faint)' }}>روی هر دارایی بزن تا زیرمجموعه‌هایش باز شود.</div>

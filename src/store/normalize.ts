@@ -1,5 +1,6 @@
 import type { RootState, Trade, TradingAccount } from '../types'
 import { DEFAULT_ACCOUNT_ID } from './defaultState'
+import { defaultAllocationPresets } from './portfolioSeed'
 import { newId } from '../lib/format/id'
 
 /**
@@ -10,9 +11,12 @@ import { newId } from '../lib/format/id'
 export function normalizeState(input: RootState): RootState {
   const s = input as unknown as Record<string, unknown>
 
-  // --- پرتفولیو: لیست یادداشت تعادل ---
+  // --- پرتفولیو: لیست یادداشت تعادل + سبدهای الگو ---
   const portfolio = (s.portfolio ?? {}) as Record<string, unknown>
   if (!Array.isArray(portfolio.rebalanceNotes)) portfolio.rebalanceNotes = []
+  if (!Array.isArray(portfolio.allocationPresets) || (portfolio.allocationPresets as unknown[]).length === 0)
+    portfolio.allocationPresets = defaultAllocationPresets()
+  s.portfolio = portfolio
 
   // --- معاملات: حساب‌ها، حساب فعال، و اتصال هر معامله به یک حساب ---
   const trading = (s.trading ?? {}) as Record<string, unknown>
