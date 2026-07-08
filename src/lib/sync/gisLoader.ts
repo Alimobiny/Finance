@@ -1,7 +1,9 @@
 import { GOOGLE_CLIENT_ID } from './googleClientId'
 
 const GIS_SRC = 'https://accounts.google.com/gsi/client'
-const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.appdata'
+// drive.file: دسترسی فقط به فایل/پوشه‌هایی که خودِ اپ می‌سازد — این‌ها در Driveِ
+// کاربر «قابل‌مشاهده»‌اند (برخلاف appdata که پنهان بود)، تا خودش بک‌آپ‌ها را ببیند.
+const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file'
 /** برای جلوگیری از رد شدن توکن درست قبل از استفاده، کمی زودتر منقضی‌شده در نظر می‌گیریم */
 const EXPIRY_SAFETY_MARGIN_MS = 30_000
 

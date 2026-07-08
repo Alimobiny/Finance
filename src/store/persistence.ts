@@ -35,8 +35,8 @@ export function buildSnapshot(store: RootStore): RootState {
 
 /**
  * روی هر تغییر استور، بعد از یک وقفهٔ کوتاه (debounce) کل وضعیت را در
- * localStorage می‌نویسد. همگام‌سازی با Google Drive جدا و با debounce
- * طولانی‌تر در lib/sync/driveSync.ts انجام می‌شود (نگاه کن به startDriveAutoSync).
+ * localStorage می‌نویسد. بک‌آپ روی Google Drive جداست و فقط دستی انجام
+ * می‌شود (نگاه کن به lib/sync/driveBackup.ts) — هیچ همگام‌سازیِ خودکاری نداریم.
  */
 export function startLocalPersistence(api: StoreApi<RootStore>): () => void {
   let timer: ReturnType<typeof setTimeout> | null = null

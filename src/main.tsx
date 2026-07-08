@@ -13,15 +13,13 @@ import App from './app/App.tsx'
 import { ErrorBoundary } from './components/ui/ErrorBoundary'
 import { useRootStore } from './store/rootStore'
 import { startLocalPersistence } from './store/persistence'
-import { bootstrapSync, startDriveAutoSync } from './lib/sync/driveSync'
 import { bootstrapAutoImport } from './features/trading/lib/autoImport'
 
-// اشتراک در تغییرات استور برای ذخیرهٔ خودکار در localStorage (debounce شده)
+// اشتراک در تغییرات استور برای ذخیرهٔ خودکار در localStorage (debounce شده).
+// عمداً هیچ همگام‌سازیِ خودکارِ Drive نداریم: بک‌آپ/بازیابی فقط دستی و با تأییدِ
+// کاربر است (نگاه کن به features/settings/DriveBackupPanel) تا داده هرگز بدون
+// اجازه بازنویسی نشود.
 startLocalPersistence(useRootStore)
-// اشتراک جداگانه برای ارسال خودکار (debounce طولانی‌تر) به Google Drive در صورت ورود قبلی
-startDriveAutoSync(useRootStore)
-// در بارگذاری اپ، اگر قبلاً وارد گوگل شده بودیم، بی‌صدا تلاش برای همگام‌سازی می‌کنیم
-void bootstrapSync()
 // اگر «منبعِ خودکارِ معاملات» تنظیم شده باشد، معاملاتِ جدیدِ متاتریدر را بی‌صدا می‌آورد
 void bootstrapAutoImport()
 

@@ -1,8 +1,6 @@
 import { create } from 'zustand'
 import type { ScreenId } from '../app/router'
 
-export type SyncStatus = 'offline' | 'local-only' | 'syncing' | 'synced' | 'error'
-
 export interface UndoToast {
   message: string
   onUndo: () => void
@@ -11,14 +9,11 @@ export interface UndoToast {
 interface UIState {
   activeScreen: ScreenId
   editMode: boolean
-  /** وضعیت همگام‌سازی Drive — تا Milestone مربوطه فقط 'local-only' باقی می‌ماند */
-  syncStatus: SyncStatus
   /** آخرین حذفِ قابل بازگردانی (Undo Toast)، با شناسهٔ نمایشی برای تشخیص تغییر */
   undoToast: (UndoToast & { key: number }) | null
 
   setActiveScreen: (screen: ScreenId) => void
   toggleEditMode: () => void
-  setSyncStatus: (status: SyncStatus) => void
   showUndoToast: (toast: UndoToast) => void
   dismissUndoToast: () => void
 }
@@ -32,12 +27,10 @@ let undoToastCounter = 0
 export const useUIStore = create<UIState>((set) => ({
   activeScreen: 'dashboard',
   editMode: false,
-  syncStatus: 'local-only',
   undoToast: null,
 
   setActiveScreen: (screen) => set({ activeScreen: screen }),
   toggleEditMode: () => set((s) => ({ editMode: !s.editMode })),
-  setSyncStatus: (status) => set({ syncStatus: status }),
   showUndoToast: (toast) => set({ undoToast: { ...toast, key: ++undoToastCounter } }),
   dismissUndoToast: () => set({ undoToast: null }),
 }))
