@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { toPersianDigits, toLatinDigits, faNumber, faMoney, faPercent, parseNumberInput } from './number'
+import { toPersianDigits, toLatinDigits, faNumber, faMoney, faPercent, parseNumberInput, sumRounded } from './number'
 
 describe('toPersianDigits', () => {
   it('ارقام لاتین را فارسی می‌کند و بقیه را دست نمی‌زند', () => {
@@ -57,5 +57,22 @@ describe('parseNumberInput', () => {
 
   it('ورودی نامعتبر → صفر', () => {
     expect(parseNumberInput('abc')).toBe(0)
+  })
+})
+
+describe('sumRounded', () => {
+  it('انباشتِ خطای float را حذف می‌کند', () => {
+    expect(sumRounded([0.1, 0.2])).toBe(0.3) // نه ۰.۳۰۰۰۰۰۰۰۰۰۰۰۰۰۰۰۴
+    expect(sumRounded([0.1, 0.1, 0.1, -0.3])).toBe(0)
+  })
+
+  it('مقادیرِ نامعتبر را نادیده می‌گیرد (هرگز NaN)', () => {
+    expect(sumRounded([1.5, NaN, 2.5])).toBe(4)
+    expect(sumRounded([])).toBe(0)
+  })
+
+  it('دقتِ اعشار قابل تنظیم است (هر جمله به همان شبکه گرد می‌شود)', () => {
+    expect(sumRounded([1.24, 2.11], 1)).toBe(3.3) // ۱۲.۴→۱۲ و ۲۱.۱→۲۱ ⇒ ۳۳/۱۰
+    expect(sumRounded([1.24, 2.11], 0)).toBe(3) // ۱→۱ و ۲→۲ ⇒ ۳
   })
 })

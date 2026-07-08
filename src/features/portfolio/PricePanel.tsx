@@ -34,7 +34,8 @@ export function PricePanel() {
       for (const [key, value] of applied) setPrice(key, value)
       markPricesApplied()
       const when = live.updatedAt ? faDateShort(new Date(live.updatedAt)) : 'اکنون'
-      setFetchState({ kind: 'ok', msg: `${applied.length} قیمت به‌روزرسانی شد${live.source ? ` · منبع: ${live.source}` : ''} · ${when}` })
+      const cacheNote = live.fromCache ? ' · آخرین نسخهٔ ذخیره‌شده (شبکه در دسترس نبود)' : ''
+      setFetchState({ kind: 'ok', msg: `${applied.length} قیمت به‌روزرسانی شد${live.source ? ` · منبع: ${live.source}` : ''} · ${when}${cacheNote}` })
     } catch (e) {
       setFetchState({ kind: 'err', msg: e instanceof Error ? e.message : 'خطای نامشخص در دریافت قیمت‌ها' })
     }

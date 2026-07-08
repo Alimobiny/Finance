@@ -1,6 +1,7 @@
 import { useRootStore, applyRemoteState } from '../../store/rootStore'
 import { buildSnapshot } from '../../store/persistence'
 import type { RootState } from '../../types'
+import { encryptString, decryptString, isEncryptedBlob } from '../crypto/secureBlob'
 
 // بک‌آپِ دستی روی یک GitHub Gistِ خصوصی — چون گیت‌هاب از ایران باز است و CORS دارد.
 // همهٔ بک‌آپ‌ها در یک gist (هر بک‌آپ = یک فایلِ زمان‌دار) جمع می‌شوند تا بین دستگاه‌ها
@@ -86,12 +87,18 @@ async function resolveGistId(token: string): Promise<string> {
   return found
 }
 
-/** بک‌آپِ الان: اگر gist نبود می‌سازد، وگرنه فایلِ زمان‌دار اضافه می‌کند. نامِ فایل را برمی‌گرداند. */
-export async function backupNow(): Promise<string> {
+/**
+ * بک‌آپِ الان: اگر gist نبود می‌سازد، وگرنه فایلِ زمان‌دار اضافه می‌کند. نامِ فایل را برمی‌گرداند.
+ * اگر عبارت‌عبور داده شود، اسنپ‌شات پیش از رفتن به گیت‌هاب با AES-GCM رمز می‌شود تا دادهٔ
+ * مالی به‌صورت متنِ ساده روی سرورِ ثالث ذخیره نشود. عبارت‌عبور هیچ‌جا نگه داشته نمی‌شود.
+ */
+export async function backupNow(passphrase?: string): Promise<string> {
   const token = getToken()
   if (!token) throw new Error('اول توکن گیت‌هاب را وارد کن.')
   const name = backupFileName()
-  const content = JSON.stringify(buildSnapshot(useRootStore.getState()))
+  const snapshot = JSON.stringify(buildSnapshot(useRootStore.getState()))
+  const pass = passphrase?.trim()
+  const content = pass ? JSON.stringify(await encryptString(snapshot, pass)) : snapshot
   const gistId = await resolveGistId(token)
 
   if (gistId) {
@@ -126,8 +133,11 @@ export async function listBackups(): Promise<string[]> {
   return sortBackupNames(Object.keys(gist.files))
 }
 
-/** بازیابیِ دستیِ یک بک‌آپ (با نامِ فایل). پیش از بازنویسی، پشتیبانِ ایمنیِ محلی نگه می‌دارد. */
-export async function restoreBackup(fileName: string): Promise<void> {
+/**
+ * بازیابیِ دستیِ یک بک‌آپ (با نامِ فایل). پیش از بازنویسی، پشتیبانِ ایمنیِ محلی نگه می‌دارد.
+ * اگر بک‌آپ رمزنگاری‌شده باشد، با عبارت‌عبور بازش می‌کند؛ بک‌آپ‌های قدیمیِ ساده هم پشتیبانی می‌شوند.
+ */
+export async function restoreBackup(fileName: string, passphrase?: string): Promise<void> {
   const token = getToken()
   if (!token) throw new Error('اول توکن گیت‌هاب را وارد کن.')
   const gistId = await resolveGistId(token)
@@ -142,7 +152,14 @@ export async function restoreBackup(fileName: string): Promise<void> {
   let content = file.content ?? ''
   if (file.truncated && file.raw_url) content = await (await fetch(file.raw_url)).text()
 
-  const parsed: unknown = JSON.parse(content)
+  // اگر رمزنگاری‌شده بود، اول بازگشایی؛ وگرنه همان محتوا. اعتبارسنجی همیشه بعد از بازگشایی.
+  const outer: unknown = JSON.parse(content)
+  let parsed: unknown = outer
+  if (isEncryptedBlob(outer)) {
+    const pass = passphrase?.trim()
+    if (!pass) throw new Error('این بک‌آپ رمزنگاری‌شده است — عبارت‌عبور را وارد کن.')
+    parsed = JSON.parse(await decryptString(outer, pass))
+  }
   if (!isValidRootState(parsed)) throw new Error('این فایل یک بک‌آپِ معتبرِ قطب‌نما نیست.')
   try {
     localStorage.setItem(PRE_RESTORE_KEY, JSON.stringify(buildSnapshot(useRootStore.getState())))

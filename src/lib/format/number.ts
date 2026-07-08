@@ -49,3 +49,15 @@ export function parseNumberInput(raw: string): number {
   const n = Number(cleaned)
   return Number.isFinite(n) ? n : 0
 }
+
+/**
+ * جمعِ ایمنِ اعداد: هر جمله را به شبکهٔ اعشارِ ثابت گرد و به‌صورتِ صحیح جمع می‌زند،
+ * تا خطای انباشتِ float در جمع‌های بزرگ (سود کل، مجموع R) رشد نکند. دقتِ decimal.js
+ * برای تجمیع، بدون وابستگی. مقادیرِ نامعتبر نادیده گرفته می‌شوند (هرگز NaN).
+ */
+export function sumRounded(values: readonly number[], decimals = 2): number {
+  const f = 10 ** decimals
+  let scaled = 0
+  for (const v of values) if (Number.isFinite(v)) scaled += Math.round(v * f)
+  return scaled / f
+}

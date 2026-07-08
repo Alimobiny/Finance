@@ -3,6 +3,7 @@ import { getToken, setToken, backupNow, listBackups, restoreBackup } from '../..
 
 export function GistBackupPanel() {
   const [tokenInput, setTokenInput] = useState(getToken())
+  const [passphrase, setPassphrase] = useState('') // در حافظهٔ نشست می‌ماند؛ هیچ‌جا ذخیره نمی‌شود
   const [busy, setBusy] = useState(false)
   const [msg, setMsg] = useState<string | null>(null)
   const [err, setErr] = useState<string | null>(null)
@@ -30,8 +31,8 @@ export function GistBackupPanel() {
 
   const onBackup = () =>
     run(async () => {
-      const name = await backupNow()
-      setMsg(`بک‌آپ «${name}» در Gist ذخیره شد.`)
+      const name = await backupNow(passphrase)
+      setMsg(`بک‌آپ «${name}» در Gist ذخیره شد${passphrase.trim() ? ' (رمزنگاری‌شده 🔒)' : ''}.`)
       setBackups(null)
     })
 
@@ -40,7 +41,7 @@ export function GistBackupPanel() {
   const onRestore = (name: string) =>
     run(async () => {
       if (!window.confirm(`همهٔ داده‌ی فعلیِ این دستگاه با بک‌آپِ «${name}» جایگزین شود؟\nپیش از جایگزینی، نسخهٔ فعلی به‌صورت پشتیبانِ ایمنی نگه داشته می‌شود.`)) return
-      await restoreBackup(name)
+      await restoreBackup(name, passphrase)
       setMsg(`بازیابی از «${name}» انجام شد.`)
     })
 
@@ -66,6 +67,20 @@ export function GistBackupPanel() {
         <button type="button" onClick={saveToken} style={{ border: '1px solid var(--border)', background: 'var(--surface)', cursor: 'pointer', borderRadius: 'var(--radius-md)', padding: '9px 16px', fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-semibold)', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
           ذخیرهٔ توکن
         </button>
+      </div>
+
+      <div style={{ marginBottom: 'var(--space-2-5)' }}>
+        <input
+          type="password"
+          value={passphrase}
+          onChange={(e) => setPassphrase(e.target.value)}
+          placeholder="عبارت‌عبورِ رمزنگاری (اختیاری)"
+          style={{ width: '100%', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '8px 10px', fontSize: 'var(--fs-xs)', background: 'var(--surface-muted)', outline: 'none' }}
+        />
+        <div style={{ fontSize: 'var(--fs-2xs)', color: 'var(--text-quiet)', marginTop: 'var(--space-1)', lineHeight: 'var(--lh-relaxed)' }}>
+          اگر عبارت‌عبور بگذاری، بک‌آپ پیش از رفتن به گیت‌هاب با <b>AES-GCM</b> رمز می‌شود. این عبارت هیچ‌جا ذخیره نمی‌شود؛
+          برای بازیابی دقیقاً همین را لازم داری — <b>فراموشش نکن</b>، بدونش بک‌آپ قابل بازیابی نیست.
+        </div>
       </div>
 
       {err && <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--accent-red-strong)', background: 'var(--accent-red-soft)', borderRadius: 'var(--radius-sm)', padding: '8px 11px', marginBottom: 'var(--space-2-5)' }}>{err}</div>}
