@@ -3,7 +3,6 @@ import { immer } from 'zustand/middleware/immer'
 import { createDashboardSlice } from './slices/dashboardSlice'
 import { createPortfolioSlice } from './slices/portfolioSlice'
 import { createTradingSlice } from './slices/tradingSlice'
-import { createMoneySlice } from './slices/moneySlice'
 import { createLifeSlice } from './slices/lifeSlice'
 import { createSettingsSlice } from './slices/settingsSlice'
 import { createHistorySlice } from './slices/historySlice'
@@ -22,7 +21,6 @@ export const useRootStore = create<RootStore>()(
     ...createDashboardSlice(initialState.dashboard)(...a),
     ...createPortfolioSlice(initialState.portfolio)(...a),
     ...createTradingSlice(initialState.trading)(...a),
-    ...createMoneySlice(initialState.money)(...a),
     ...createLifeSlice(initialState.life)(...a),
     ...createSettingsSlice(initialState.settings)(...a),
     ...createHistorySlice(initialState.history)(...a),
@@ -36,7 +34,6 @@ export function applyRemoteState(state: RootState): void {
     dashboard: normalized.dashboard,
     portfolio: normalized.portfolio,
     trading: normalized.trading,
-    money: normalized.money,
     life: normalized.life,
     settings: normalized.settings,
     history: normalized.history,

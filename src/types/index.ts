@@ -145,36 +145,6 @@ export interface TradingState {
   positionSize: PositionSizeInputs
 }
 
-// ==================== مالی ====================
-
-export interface LineItem {
-  id: string
-  label: string
-  value: number
-}
-
-export type Debt =
-  | { id: string; kind: 'installment'; name: string; total: number; monthly: number; count: number; paid: number }
-  | { id: string; kind: 'personal'; name: string; total: number; monthly: number; count: number; paid: number }
-  | { id: string; kind: 'lumpSum'; name: string; total: number; dueDate: string; settled: boolean }
-
-export interface TaxInputs {
-  gross: number
-  deduct: number
-  exempt: number
-  rate: number
-}
-
-export interface MoneyState {
-  emergencyTarget: number
-  emergencyCurrent: number
-  income: LineItem[]
-  expenses: LineItem[]
-  debts: Debt[]
-  debtMonthlyCommitment: number
-  tax: TaxInputs
-}
-
 // ==================== برنامهٔ روزانه ====================
 
 export type DayPeriod = 'صبح' | 'عصر' | 'شب'
@@ -244,7 +214,6 @@ export interface RootState {
   dashboard: DashboardState
   portfolio: PortfolioState
   trading: TradingState
-  money: MoneyState
   life: LifeState
   settings: SettingsState
   history: HistoryState

@@ -6,7 +6,6 @@ import { EditableTextList } from '../../components/ui/EditableTextList'
 import { GoalsCard } from './GoalsCard'
 import { KpiCards } from './KpiCards'
 import { MbtiCard } from './MbtiCard'
-import { NewsCard } from './NewsCard'
 
 const REVIEWS = [
   { every: 'روزانه', dur: '۳۰ دقیقه', what: 'وضعیت، نتایج معاملات، رعایت قوانین، کالیبراسیون' },
@@ -38,10 +37,6 @@ export function DashboardScreen() {
 
       <GoalsCard />
       <KpiCards />
-
-      <div style={{ marginBottom: 14 }}>
-        <NewsCard />
-      </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(290px,1fr))', gap: 14 }}>
         <Card title={<span>▪ قوانین آهنین</span>}>

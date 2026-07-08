@@ -148,21 +148,6 @@ export function createDefaultState(): RootState {
       scoreThreshold: 60,
       positionSize: { balanceUsd: 0, riskPercent: 0.5, stopUsd: 0 },
     },
-    money: {
-      emergencyTarget: 0,
-      emergencyCurrent: 0,
-      income: textItems(['درآمد اصلی', 'درآمد معامله‌گری', 'سود سرمایه‌گذاری', 'سایر درآمدها']).map((t) => ({
-        id: t.id,
-        label: t.text,
-        value: 0,
-      })),
-      expenses: textItems(['مسکن', 'خوراک و سوپرمارکت', 'قبض‌ها', 'خودرو و حمل‌ونقل', 'درمان و دارو', 'بیمه', 'تفریح', 'آموزش']).map(
-        (t) => ({ id: t.id, label: t.text, value: 0 }),
-      ),
-      debts: [],
-      debtMonthlyCommitment: 0,
-      tax: { gross: 0, deduct: 0, exempt: 0, rate: 10 },
-    },
     life: {
       anchors: [],
       executionRules: textItems([

@@ -1,6 +1,7 @@
 import { useRootStore, applyRemoteState } from '../../store/rootStore'
 import { buildSnapshot } from '../../store/persistence'
 import type { RootState } from '../../types'
+import { jalaaliFileStamp } from '../format/date'
 
 /**
  * دانلود دستی کل داده به‌صورت یک فایل JSON — چون appDataFolder در Drive
@@ -13,7 +14,7 @@ export function downloadBackup(): void {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `qotbnama-backup-${new Date().toISOString().slice(0, 10)}.json`
+  a.download = `qotbnama-backup-${jalaaliFileStamp()}.json`
   a.click()
   setTimeout(() => URL.revokeObjectURL(url), 2000)
 }
@@ -21,7 +22,7 @@ export function downloadBackup(): void {
 function isValidRootState(value: unknown): value is RootState {
   if (!value || typeof value !== 'object') return false
   const v = value as Record<string, unknown>
-  return ['meta', 'dashboard', 'portfolio', 'trading', 'money', 'life', 'settings'].every((key) => key in v)
+  return ['meta', 'dashboard', 'portfolio', 'trading', 'life', 'settings'].every((key) => key in v)
 }
 
 export async function restoreFromFile(file: File): Promise<void> {

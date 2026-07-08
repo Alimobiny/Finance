@@ -26,7 +26,6 @@ export function buildSnapshot(store: RootStore): RootState {
     dashboard: store.dashboard,
     portfolio: store.portfolio,
     trading: store.trading,
-    money: store.money,
     life: store.life,
     settings: store.settings,
     history: store.history,

@@ -2,11 +2,13 @@ import { describe, it, expect } from 'vitest'
 import { backupFileName, isValidRootState, sortBackupNames } from './gistBackup'
 
 describe('backupFileName', () => {
-  it('نام را با تاریخ و ساعتِ محلی و پسوندِ json می‌سازد', () => {
-    expect(backupFileName(new Date(2026, 6, 5, 9, 5))).toBe('qotbnama-backup-2026-07-05_09-05.json')
+  it('نام را با تاریخ و ساعتِ شمسی به وقت تهران و پسوندِ json می‌سازد', () => {
+    // 2026-07-05T05:35Z = ۹:۰۵ صبحِ تهران (UTC+3:30) = ۱۴۰۵/۰۴/۱۴
+    expect(backupFileName(new Date('2026-07-05T05:35:00Z'))).toBe('qotbnama-backup-1405-04-14_09-05.json')
   })
-  it('تک‌رقمی‌ها را صفرپیشوند می‌کند', () => {
-    expect(backupFileName(new Date(2026, 0, 1, 0, 0))).toBe('qotbnama-backup-2026-01-01_00-00.json')
+  it('تک‌رقمی‌های ماه/روز/ساعت را صفرپیشوند می‌کند', () => {
+    // 2026-06-21T23:37Z = ۳:۰۷ بامدادِ تهرانِ ۲۰۲۶-۰۶-۲۲ = ۱۴۰۵/۰۴/۰۱
+    expect(backupFileName(new Date('2026-06-21T23:37:00Z'))).toBe('qotbnama-backup-1405-04-01_03-07.json')
   })
 })
 
