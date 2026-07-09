@@ -1,16 +1,13 @@
 import { useRootStore } from '../../store/rootStore'
 import { computeTradeStats } from '../trading/lib/tradeStats'
-import { portfolioTotal } from '../portfolio/lib/computeHoldingValue'
-import { faMoney, faNumber, faPercent } from '../../lib/format/number'
+import { faNumber, faPercent } from '../../lib/format/number'
 import { StatTile } from '../../components/ui/StatTile'
 
 // کاشی‌های KPI حالا از primitive مشترک StatTile استفاده می‌کنند؛ کامپوننت
 // محلیِ Kpi حذف شد چون با Box در ژورنال تقریباً یکسان بود (رفع تکرار).
 export function KpiCards() {
   const trades = useRootStore((s) => s.trading.trades)
-  const portfolio = useRootStore((s) => s.portfolio)
   const stats = computeTradeStats(trades)
-  const total = portfolioTotal(portfolio)
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(165px,1fr))', gap: 'var(--space-3)', marginBottom: 'var(--space-4)' }}>
@@ -31,7 +28,6 @@ export function KpiCards() {
         sub="هدف ۱۰۰٪"
         color={stats.rule1Rate == null ? 'var(--text-quiet)' : stats.rule1Rate >= 100 ? 'var(--accent-green)' : 'var(--accent-gold-dark)'}
       />
-      <StatTile size="kpi" accentBar label="پرتفولیو" value={total === 0 ? '—' : faMoney(total)} sub="هدف ۶۰٪ دفاعی" color="var(--accent-green)" />
     </div>
   )
 }

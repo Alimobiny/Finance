@@ -22,7 +22,7 @@ export function downloadBackup(): void {
 function isValidRootState(value: unknown): value is RootState {
   if (!value || typeof value !== 'object') return false
   const v = value as Record<string, unknown>
-  return ['meta', 'dashboard', 'portfolio', 'trading', 'life', 'settings'].every((key) => key in v)
+  return ['meta', 'dashboard', 'trading', 'life', 'settings'].every((key) => key in v)
 }
 
 export async function restoreFromFile(file: File): Promise<void> {

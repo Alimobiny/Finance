@@ -24,42 +24,6 @@ export interface DashboardState {
   tacticalPulse: string
 }
 
-// ==================== پرتفولیو ====================
-
-export type PriceKey = 'usd' | 'usdt' | 'coin' | 'gold18'
-
-export type HoldingSub =
-  | { id: string; kind: 'manual'; name: string; value: number }
-  | { id: string; kind: 'linked'; name: string; unit: PriceKey; qty: number }
-
-export interface Holding {
-  id: string
-  name: string
-  layer: string
-  role: string
-  target: number // درصد هدف از کل پرتفولیو
-  color: string
-  subs: HoldingSub[]
-}
-
-/** یک «سبدِ الگو» — مجموعه‌ای از درصدهای هدف که با یک کلیک روی دسته‌ها اعمال می‌شود (کم‌ریسک/دفاعی/جنگی) */
-export interface AllocationPreset {
-  id: string
-  name: string
-  /** درصدِ هدفِ هر دسته، با کلیدِ نامِ دسته (هم‌راستا با نامِ Holding) */
-  weights: { category: string; target: number }[]
-}
-
-export interface PortfolioState {
-  holdings: Holding[]
-  prices: Record<PriceKey, number>
-  pricesUpdatedAt: string | null
-  /** یادداشت‌های تعادل قابل‌ویرایش کاربر (جدا از پیشنهاد خودکار محاسبه‌شده) */
-  rebalanceNotes: TextListItem[]
-  /** سبدهای الگوی تخصیص (پیش‌فرض: کم‌ریسک/دفاعی/جنگی از اکسلِ حسابرسی) */
-  allocationPresets: AllocationPreset[]
-}
-
 // ==================== معاملات ====================
 
 export type TradeDirection = 'خرید' | 'فروش'
@@ -229,11 +193,10 @@ export interface HistoryState {
 export interface RootState {
   meta: Meta
   dashboard: DashboardState
-  portfolio: PortfolioState
   trading: TradingState
   life: LifeState
   settings: SettingsState
   history: HistoryState
 }
 
-export const SCHEMA_VERSION = 2
+export const SCHEMA_VERSION = 3

@@ -24,7 +24,6 @@ export function buildSnapshot(store: RootStore): RootState {
   return {
     meta: { updatedAt: new Date().toISOString(), schemaVersion: SCHEMA_VERSION },
     dashboard: store.dashboard,
-    portfolio: store.portfolio,
     trading: store.trading,
     life: store.life,
     settings: store.settings,

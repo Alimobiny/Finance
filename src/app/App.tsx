@@ -4,14 +4,12 @@ import type { ScreenId } from './router'
 import { useUIStore } from '../store/uiStore'
 import { UndoToast } from '../components/ui/UndoToast'
 import { DashboardScreen } from '../features/dashboard/DashboardScreen'
-import { PortfolioScreen } from '../features/portfolio/PortfolioScreen'
 import { TradingScreen } from '../features/trading/TradingScreen'
 import { LifeScreen } from '../features/life/LifeScreen'
 import { SettingsScreen } from '../features/settings/SettingsScreen'
 
 const SCREENS: Record<ScreenId, ComponentType> = {
   dashboard: DashboardScreen,
-  portfolio: PortfolioScreen,
   trading: TradingScreen,
   life: LifeScreen,
   settings: SettingsScreen,

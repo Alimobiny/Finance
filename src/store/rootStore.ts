@@ -1,7 +1,6 @@
 import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
 import { createDashboardSlice } from './slices/dashboardSlice'
-import { createPortfolioSlice } from './slices/portfolioSlice'
 import { createTradingSlice } from './slices/tradingSlice'
 import { createLifeSlice } from './slices/lifeSlice'
 import { createSettingsSlice } from './slices/settingsSlice'
@@ -19,7 +18,6 @@ const initialState = persisted ? normalizeState(persisted) : createDefaultState(
 export const useRootStore = create<RootStore>()(
   immer((...a) => ({
     ...createDashboardSlice(initialState.dashboard)(...a),
-    ...createPortfolioSlice(initialState.portfolio)(...a),
     ...createTradingSlice(initialState.trading)(...a),
     ...createLifeSlice(initialState.life)(...a),
     ...createSettingsSlice(initialState.settings)(...a),
@@ -32,7 +30,6 @@ export function applyRemoteState(state: RootState): void {
   const normalized = normalizeState(state)
   useRootStore.setState({
     dashboard: normalized.dashboard,
-    portfolio: normalized.portfolio,
     trading: normalized.trading,
     life: normalized.life,
     settings: normalized.settings,

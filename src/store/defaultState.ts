@@ -1,6 +1,5 @@
 import { newId } from '../lib/format/id'
 import { SCHEMA_VERSION, type RootState, type TextListItem } from '../types'
-import { standardBaskets, defaultAllocationPresets } from './portfolioSeed'
 
 /** شناسهٔ ثابت حساب پیش‌فرض تا مهاجرت دادهٔ قدیمی هم به همین حساب بچسبد */
 export const DEFAULT_ACCOUNT_ID = 'acc-main'
@@ -41,13 +40,6 @@ export function createDefaultState(): RootState {
       goldenRule: 'هر تصمیم در استرس یا هیجان — ۲۴ ساعت صبر، سپس با ذهن آرام.',
       marketPulse: '',
       tacticalPulse: '',
-    },
-    portfolio: {
-      holdings: standardBaskets(),
-      prices: { usd: 0, usdt: 0, coin: 0, gold18: 0 },
-      pricesUpdatedAt: null,
-      rebalanceNotes: [],
-      allocationPresets: defaultAllocationPresets(),
     },
     trading: {
       accounts: [{ id: DEFAULT_ACCOUNT_ID, name: 'حساب اصلی', balance: 0, riskPercent: 1 }],

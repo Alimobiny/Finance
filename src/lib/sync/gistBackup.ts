@@ -45,7 +45,7 @@ export function backupFileName(d: Date = new Date()): string {
 export function isValidRootState(value: unknown): value is RootState {
   if (!value || typeof value !== 'object') return false
   const v = value as Record<string, unknown>
-  return ['meta', 'dashboard', 'portfolio', 'trading', 'life', 'settings'].every((k) => k in v)
+  return ['meta', 'dashboard', 'trading', 'life', 'settings'].every((k) => k in v)
 }
 
 /** نامِ فایل‌های بک‌آپ را نزولی (تازه‌ترین اول) مرتب می‌کند — چون نام شامل زمان است. */
