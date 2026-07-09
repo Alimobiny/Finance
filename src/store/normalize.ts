@@ -1,5 +1,5 @@
 import type { RootState, Trade, TradingAccount } from '../types'
-import { DEFAULT_ACCOUNT_ID } from './defaultState'
+import { DEFAULT_ACCOUNT_ID, DEFAULT_SETUPS, DEFAULT_MISTAKES } from './defaultState'
 import { newId } from '../lib/format/id'
 import { faWeekdayIndex, jalaaliDayKey } from '../lib/format/date'
 
@@ -41,6 +41,10 @@ export function normalizeState(input: RootState): RootState {
     if (!t.accountId || !accountIds.has(t.accountId)) t.accountId = activeId
     if (t.profit === undefined) t.profit = null
     if (t.riskUsd === undefined) t.riskUsd = null
+    // فیلدهای جدیدِ ژورنال (تگ‌ها و امتیاز) روی معاملاتِ قدیمی
+    if (typeof t.setup !== 'string') t.setup = ''
+    if (typeof t.mistake !== 'string') t.mistake = ''
+    if (t.score === undefined) t.score = null
   }
   trading.trades = trades
 
@@ -111,6 +115,8 @@ export function normalizeState(input: RootState): RootState {
   // --- تنظیمات: URL منبعِ خودکارِ معاملات ---
   const settings = (s.settings ?? {}) as Record<string, unknown>
   if (typeof settings.autoImportUrl !== 'string') settings.autoImportUrl = ''
+  if (!Array.isArray(settings.setups)) settings.setups = DEFAULT_SETUPS.map((text) => ({ id: newId(), text }))
+  if (!Array.isArray(settings.mistakes)) settings.mistakes = DEFAULT_MISTAKES.map((text) => ({ id: newId(), text }))
   s.settings = settings
 
   // --- تاریخچهٔ تغییرات ---

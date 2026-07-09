@@ -34,10 +34,10 @@ export function TradesTable({ trades }: { trades: Trade[] }) {
 
   return (
     <div className="scrl" style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', overflowX: 'auto' }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12.5, minWidth: 760 }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12.5, minWidth: 860 }}>
         <thead>
           <tr style={{ background: 'var(--surface-muted)', textAlign: 'right', color: 'var(--text-faint)' }}>
-            {['تاریخ', 'نماد', 'جهت', 'نتیجه', 'ریسک', 'R:R', 'نتیجهٔ R', 'چک‌لیست', 'قانون ۱', 'احساس', ''].map((h) => (
+            {['تاریخ', 'نماد', 'جهت', 'نتیجه', 'ریسک', 'R:R', 'نتیجهٔ R', 'چک‌لیست', 'قانون ۱', 'احساس', 'ست‌آپ', ''].map((h) => (
               <th key={h} style={{ padding: '11px 12px', fontWeight: 600 }}>
                 {h}
               </th>
@@ -74,6 +74,14 @@ export function TradesTable({ trades }: { trades: Trade[] }) {
                 <td style={{ padding: '10px 12px', color: t.checklistFollowed ? 'var(--accent-green)' : 'var(--accent-red-strong)', fontWeight: 600 }}>{t.checklistFollowed ? 'بله' : 'خیر'}</td>
                 <td style={{ padding: '10px 12px', color: t.rule1Followed ? 'var(--accent-green)' : 'var(--accent-red-strong)', fontWeight: 600 }}>{t.rule1Followed ? 'بله' : 'خیر'}</td>
                 <td style={{ padding: '10px 12px', color: 'var(--text-muted)' }}>{t.emotion || '—'}</td>
+                <td style={{ padding: '10px 12px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 3, alignItems: 'flex-start' }}>
+                    <span style={{ color: t.setup ? 'var(--text)' : 'var(--text-quiet)' }}>{t.setup || '—'}</span>
+                    {t.mistake && (
+                      <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--accent-red-strong)', background: 'var(--accent-red-soft)', borderRadius: 5, padding: '2px 6px' }}>{t.mistake}</span>
+                    )}
+                  </div>
+                </td>
                 <td style={{ padding: '10px 12px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
                     {t.shot && (

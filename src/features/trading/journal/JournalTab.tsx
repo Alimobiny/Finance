@@ -2,6 +2,7 @@ import { useRootStore } from '../../../store/rootStore'
 import { AccountBar } from './AccountBar'
 import { StatBoxes } from './StatBoxes'
 import { EquityCurve } from './EquityCurve'
+import { TradeBreakdown } from './TradeBreakdown'
 import { ImportPanel } from './ImportPanel'
 import { TradeForm } from './TradeForm'
 import { TradesTable } from './TradesTable'
@@ -22,6 +23,7 @@ export function JournalTab() {
       <AccountBar />
       <StatBoxes trades={trades} calmCount={calmCount} negativeCount={negativeCount} />
       <EquityCurve trades={trades} />
+      <TradeBreakdown trades={trades} />
       <ImportPanel />
       <TradeForm />
       <TradesTable trades={trades} />

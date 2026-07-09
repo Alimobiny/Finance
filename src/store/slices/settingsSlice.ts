@@ -16,6 +16,16 @@ export interface SettingsSlice {
   removeEmotion: (id: string) => void
   restoreEmotion: (item: TextListItem, index: number) => void
 
+  addSetup: () => void
+  updateSetup: (id: string, text: string) => void
+  removeSetup: (id: string) => void
+  restoreSetup: (item: TextListItem, index: number) => void
+
+  addMistake: () => void
+  updateMistake: (id: string, text: string) => void
+  removeMistake: (id: string) => void
+  restoreMistake: (item: TextListItem, index: number) => void
+
   setLastSyncedAt: (iso: string | null) => void
   setAutoImportUrl: (url: string) => void
 }
@@ -57,6 +67,40 @@ export const createSettingsSlice = (
   restoreEmotion: (item, index) =>
     set((s) => {
       insertTextItem(s.settings.emotions, item, index)
+    }),
+
+  addSetup: () =>
+    set((s) => {
+      addTextItem(s.settings.setups)
+    }),
+  updateSetup: (id, text) =>
+    set((s) => {
+      updateTextItem(s.settings.setups, id, text)
+    }),
+  removeSetup: (id) =>
+    set((s) => {
+      removeTextItem(s.settings.setups, id)
+    }),
+  restoreSetup: (item, index) =>
+    set((s) => {
+      insertTextItem(s.settings.setups, item, index)
+    }),
+
+  addMistake: () =>
+    set((s) => {
+      addTextItem(s.settings.mistakes)
+    }),
+  updateMistake: (id, text) =>
+    set((s) => {
+      updateTextItem(s.settings.mistakes, id, text)
+    }),
+  removeMistake: (id) =>
+    set((s) => {
+      removeTextItem(s.settings.mistakes, id)
+    }),
+  restoreMistake: (item, index) =>
+    set((s) => {
+      insertTextItem(s.settings.mistakes, item, index)
     }),
 
   setLastSyncedAt: (iso) =>

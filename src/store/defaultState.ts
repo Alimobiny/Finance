@@ -4,6 +4,10 @@ import { SCHEMA_VERSION, type RootState, type TextListItem } from '../types'
 /** شناسهٔ ثابت حساب پیش‌فرض تا مهاجرت دادهٔ قدیمی هم به همین حساب بچسبد */
 export const DEFAULT_ACCOUNT_ID = 'acc-main'
 
+/** تگ‌های پیش‌فرضِ ست‌آپ و اشتباه — بین defaultState و normalize مشترک‌اند. */
+export const DEFAULT_SETUPS = ['Miner-EOW', 'Miner-EOC', 'PA-EOW', 'PA-EOC', 'ACD']
+export const DEFAULT_MISTAKES = ['جابه‌جایی حد ضرر', 'حجم زیاد', 'ورود زودهنگام', 'خارج از ساعت', 'انتقام/FOMO', 'بدون پلن', 'خروج زودهنگام']
+
 const textItems = (texts: string[]): TextListItem[] => texts.map((text) => ({ id: newId(), text }))
 
 /**
@@ -155,6 +159,8 @@ export function createDefaultState(): RootState {
     settings: {
       symbols: textItems(['XAUUSD', 'EURUSD', 'GBPUSD', 'BTCUSD', 'US30']),
       emotions: textItems(['آرام', 'مضطرب', 'عصبانی', 'ترس', 'طمع', 'بی‌تفاوت']),
+      setups: textItems(DEFAULT_SETUPS),
+      mistakes: textItems(DEFAULT_MISTAKES),
       lastSyncedAt: null,
       autoImportUrl: '',
     },

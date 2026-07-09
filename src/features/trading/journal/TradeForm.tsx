@@ -15,6 +15,14 @@ function parseRInput(raw: string): number | null {
   return Number.isFinite(n) ? n : null
 }
 
+/** متن ورودی «امتیاز ست‌آپ» را به عدد مثبت یا null تبدیل می‌کند (هرگز NaN/منفی). */
+function parseScoreInput(raw: string): number | null {
+  const cleaned = toLatinDigits(raw).replace(/[^\d.]/g, '')
+  if (cleaned === '' || cleaned === '.') return null
+  const n = Number(cleaned)
+  return Number.isFinite(n) && n >= 0 ? n : null
+}
+
 const EMPTY_PRICES = { entry: '', stop: '', tp: '', exit: '' }
 
 const OUTCOME_FROM_R = (r: number): TradeOutcome => (r > 0 ? 'win' : r < 0 ? 'loss' : 'be')
@@ -38,6 +46,9 @@ const EMPTY_FORM: NewTradeInput = {
   checklistFollowed: true,
   rule1Followed: true,
   emotion: '',
+  setup: '',
+  mistake: '',
+  score: null,
   reason: '',
   lesson: '',
   shot: null,
@@ -46,6 +57,8 @@ const EMPTY_FORM: NewTradeInput = {
 export function TradeForm() {
   const symbols = useRootStore((s) => s.settings.symbols)
   const emotions = useRootStore((s) => s.settings.emotions)
+  const setups = useRootStore((s) => s.settings.setups)
+  const mistakes = useRootStore((s) => s.settings.mistakes)
   const trades = useRootStore((s) => s.trading.trades)
   const accounts = useRootStore((s) => s.trading.accounts)
   const activeAccountId = useRootStore((s) => s.trading.activeAccountId)
@@ -60,6 +73,7 @@ export function TradeForm() {
   // متن خام فیلدهای عددی را جدا نگه می‌داریم تا تایپ «-» یا «1.» وسط کار به null تبدیل نشود.
   const [rText, setRText] = useState('')
   const [riskUsdText, setRiskUsdText] = useState('')
+  const [scoreText, setScoreText] = useState('')
   const [priceText, setPriceText] = useState(EMPTY_PRICES)
   const [imageBusy, setImageBusy] = useState(false)
 
@@ -72,6 +86,7 @@ export function TradeForm() {
       setRText(rest.r != null && Number.isFinite(rest.r) ? String(rest.r) : '')
       const num = (v: number | null | undefined) => (v != null && Number.isFinite(v) ? String(v) : '')
       setRiskUsdText(num(rest.riskUsd))
+      setScoreText(num(rest.score))
       setPriceText({ entry: num(rest.entry), stop: num(rest.stop), tp: num(rest.tp), exit: num(rest.exit) })
     }
   }, [editingTrade])
@@ -132,6 +147,7 @@ export function TradeForm() {
       rr: rrValue,
       r: rNum, // همیشه عدد پاک یا null — هرگز NaN (از قیمت‌ها یا ورودی دستی)
       riskUsd: riskUsdN,
+      score: parseScoreInput(scoreText),
       outcome: rLocked ? '' : form.outcome, // با R معتبر، نتیجه از R مشتق می‌شود
       date: form.date || faDateShort(new Date()),
       symbol: form.symbol.trim() || 'XAUUSD',
@@ -141,6 +157,7 @@ export function TradeForm() {
     setForm(EMPTY_FORM)
     setRText('')
     setRiskUsdText('')
+    setScoreText('')
     setPriceText(EMPTY_PRICES)
   }
 
@@ -254,6 +271,25 @@ export function TradeForm() {
               ))}
             </select>
           </Field>
+          <Field label="ست‌آپ">
+            <input value={form.setup} onChange={(e) => set('setup', e.target.value)} list="setuplist" placeholder="مثلاً ACD" style={inputStyle} />
+            <datalist id="setuplist">
+              {setups.map((x) => (
+                <option key={x.id} value={x.text} />
+              ))}
+            </datalist>
+          </Field>
+          <Field label="اشتباه (اگر بود)">
+            <input value={form.mistake} onChange={(e) => set('mistake', e.target.value)} list="mistakelist" placeholder="—" style={inputStyle} />
+            <datalist id="mistakelist">
+              {mistakes.map((x) => (
+                <option key={x.id} value={x.text} />
+              ))}
+            </datalist>
+          </Field>
+          <Field label="امتیاز ست‌آپ">
+            <input value={scoreText} onChange={(e) => setScoreText(e.target.value)} placeholder="۰ تا ۱۰۰" inputMode="decimal" style={{ ...inputStyle, direction: 'ltr', textAlign: 'left' }} />
+          </Field>
         </div>
 
         <div style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 9, lineHeight: 1.6 }}>
@@ -310,6 +346,7 @@ export function TradeForm() {
                 setForm(EMPTY_FORM)
                 setRText('')
                 setRiskUsdText('')
+                setScoreText('')
                 setPriceText(EMPTY_PRICES)
               }}
               style={{ border: '1px solid var(--border)', background: 'var(--surface)', cursor: 'pointer', borderRadius: 10, padding: '10px 18px', fontSize: 13, fontWeight: 600, color: 'var(--text-muted)' }}

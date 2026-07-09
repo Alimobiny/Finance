@@ -57,6 +57,12 @@ export interface Trade {
   checklistFollowed: boolean
   rule1Followed: boolean
   emotion: string
+  /** تگِ ست‌آپ/استراتژی (از لیستِ settings.setups) — مبنای تحلیلِ تفکیکی */
+  setup: string
+  /** تگِ اشتباه (از لیستِ settings.mistakes) — برای دیدنِ هزینهٔ رفتارها */
+  mistake: string
+  /** امتیازِ ست‌آپ هنگام ورود (محاسبه‌گرِ IPS)؛ null اگر ثبت نشده */
+  score: number | null
   reason: string
   lesson: string
   /** دیتا-یو‌آر‌ال فشرده‌شدهٔ اسکرین‌شات (حداکثر ~۸۰۰px، کیفیت پایین) */
@@ -164,6 +170,10 @@ export interface LifeState {
 export interface SettingsState {
   symbols: TextListItem[]
   emotions: TextListItem[]
+  /** تگ‌های ست‌آپ/استراتژی برای ژورنال (Miner/PA/ACD/…) */
+  setups: TextListItem[]
+  /** تگ‌های اشتباه برای ژورنال (جابه‌جایی استاپ، حجم زیاد، …) */
+  mistakes: TextListItem[]
   lastSyncedAt: string | null
   /** URLِ منبعِ خودکارِ معاملات (خروجیِ Apps Script که EA به آن می‌نویسد). خالی = غیرفعال. */
   autoImportUrl: string
