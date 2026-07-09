@@ -2,6 +2,7 @@ import type { RootState, Trade, TradingAccount } from '../types'
 import { DEFAULT_ACCOUNT_ID } from './defaultState'
 import { defaultAllocationPresets } from './portfolioSeed'
 import { newId } from '../lib/format/id'
+import { faWeekdayIndex, jalaaliDayKey } from '../lib/format/date'
 
 /**
  * دادهٔ ذخیره‌شدهٔ نسخه‌های قبلی (localStorage / Google Drive / فایل پشتیبان) ممکن است
@@ -85,10 +86,35 @@ export function normalizeState(input: RootState): RootState {
     trading.scoreSections = scoreSections
   }
 
-  // --- برنامه: کارها و یادداشت ---
+  // --- برنامه: کارها، یادداشت، و مهاجرتِ لنگرها به مدلِ عادت (schedule/completions/cue) ---
   const life = (s.life ?? {}) as Record<string, unknown>
   if (!Array.isArray(life.tasks)) life.tasks = []
   if (typeof life.notes !== 'string') life.notes = ''
+  const anchors = Array.isArray(life.anchors) ? (life.anchors as Array<Record<string, unknown>>) : []
+  const DAY_MS = 86400000
+  for (const a of anchors) {
+    if (typeof a.cue !== 'string') a.cue = ''
+    if (!Array.isArray(a.completions)) a.completions = []
+    if (!a.schedule || typeof a.schedule !== 'object') {
+      const aw = Array.isArray(a.activeWeekdays) ? (a.activeWeekdays as number[]) : []
+      a.schedule = aw.length > 0 ? { kind: 'weekdays', weekdays: [...aw].sort((x, y) => x - y) } : { kind: 'daily' }
+      // «انجام‌شده‌های این هفته»ی قدیمی را به لاگِ تاریخ‌دارِ همین هفته منتقل می‌کنیم.
+      const dw = Array.isArray(a.doneWeekdays) ? (a.doneWeekdays as number[]) : []
+      if (dw.length) {
+        const now = new Date()
+        const sat = new Date(now.getTime() - faWeekdayIndex(now) * DAY_MS)
+        const comp = a.completions as string[]
+        for (const di of dw) {
+          const dayKey = jalaaliDayKey(new Date(sat.getTime() + di * DAY_MS))
+          if (!comp.includes(dayKey)) comp.push(dayKey)
+        }
+      }
+    }
+    delete a.activeWeekdays
+    delete a.doneWeekdays
+  }
+  life.anchors = anchors
+  s.life = life
 
   // --- تنظیمات: URL منبعِ خودکارِ معاملات ---
   const settings = (s.settings ?? {}) as Record<string, unknown>

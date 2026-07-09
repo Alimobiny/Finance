@@ -157,7 +157,6 @@ export function createDefaultState(): RootState {
         'شکست = داده، نه نقص شخصیت',
         'محفوظهٔ آرامش: پیامد نزدیک را بگو — «اگر الان بخوابم، صبح چه می‌شود»',
       ]),
-      currentWeekKey: '',
       tasks: [],
       notes: '',
     },

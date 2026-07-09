@@ -61,6 +61,14 @@ export function jalaaliFileStamp(date: Date = new Date()): string {
   return `${jy}-${p2(jm)}-${p2(jd)}_${p2(hh)}-${p2(mm)}`
 }
 
+/** کلیدِ روزِ شمسیِ تهران برای لاگِ عادت‌ها: 1405-04-18 (صفرپیشوند، قابلِ مقایسه) */
+export function jalaaliDayKey(date: Date = new Date()): string {
+  const { gy, gm, gd } = tehranParts(date)
+  const { jy, jm, jd } = toJalaali(gy, gm, gd)
+  const p2 = (n: number) => String(n).padStart(2, '0')
+  return `${jy}-${p2(jm)}-${p2(jd)}`
+}
+
 /** شناسهٔ یکتای هفتهٔ شمسی جاری (شنبهٔ آن هفته) به وقت تهران، برای تشخیص «هفتهٔ جدید» جهت ریست لنگرها */
 export function jalaaliWeekKey(date: Date): string {
   const { gy, gm, gd } = tehranParts(date)

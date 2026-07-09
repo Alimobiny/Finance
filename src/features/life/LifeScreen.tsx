@@ -5,7 +5,6 @@ import { Card } from '../../components/ui/Card'
 import { EditableTextList } from '../../components/ui/EditableTextList'
 import { AnchorCard } from './AnchorCard'
 import { TasksNotesCard } from './TasksNotesCard'
-import { jalaaliWeekKey } from '../../lib/format/date'
 import type { DayPeriod } from '../../types'
 
 const PERIODS: { key: DayPeriod; label: string; color: string; icon: string }[] = [
@@ -18,7 +17,6 @@ export function LifeScreen() {
   const editMode = useUIStore((s) => s.editMode)
   const anchors = useRootStore((s) => s.life.anchors)
   const addAnchor = useRootStore((s) => s.addAnchor)
-  const resetWeek = useRootStore((s) => s.resetWeek)
 
   const executionRules = useRootStore((s) => s.life.executionRules)
   const addExecutionRule = useRootStore((s) => s.addExecutionRule)
@@ -29,21 +27,14 @@ export function LifeScreen() {
   return (
     <section style={{ animation: 'fadeUp .3s ease' }}>
       <ScreenHeader
-        eyebrow="برنامهٔ من — لنگرها و سیستم"
+        eyebrow="برنامهٔ من — لنگرها و عادت‌ها"
         eyebrowColor="var(--accent-gold-dark)"
-        title="لنگرهای ثابت هفته"
-        subtitle="عادت‌های ثابت هفتگی که هویت مدنظرت را می‌سازند — با ذهنی آرام و بدون فشار."
+        title="ردیاب عادت"
+        subtitle="عادت‌ها را با یک «لنگر» (بعد از کاری که همیشه انجام می‌دهی) بساز. زنجیره، درصد و هیت‌مپ خودکار حساب می‌شوند."
       />
 
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 14 }}>
-        <div style={{ fontSize: 12.5, color: 'var(--text-faint)' }}>روی هر روز بزن تا انجام‌شده ثبت شود.</div>
-        <button
-          type="button"
-          onClick={() => resetWeek(jalaaliWeekKey(new Date()))}
-          style={{ border: '1px solid var(--border)', background: 'var(--surface)', cursor: 'pointer', borderRadius: 9, padding: '8px 16px', fontSize: 12.5, fontWeight: 600, color: 'var(--text-muted)' }}
-        >
-          شروع هفتهٔ جدید
-        </button>
+      <div style={{ fontSize: 12.5, color: 'var(--text-faint)', marginBottom: 14 }}>
+        روی «امروز انجام بده» بزن یا خانه‌های هیت‌مپ را کلیک کن؛ زنجیره و پیشرفت خودکار به‌روز می‌شوند.
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 18, marginBottom: 18 }}>

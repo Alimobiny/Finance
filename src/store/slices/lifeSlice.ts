@@ -3,18 +3,18 @@ import type { RootStore, Mutators } from '../rootStoreType'
 import { newId } from '../../lib/format/id'
 import { addTextItem, insertTextItem, removeTextItem, updateTextItem } from '../listHelpers'
 import { recordChange } from '../history'
-import type { DayPeriod, LifeState, TextListItem, TimeAnchor, TodoItem } from '../../types'
+import type { DayPeriod, HabitSchedule, LifeState, TextListItem, TimeAnchor, TodoItem } from '../../types'
 
 export interface LifeSlice {
   life: LifeState
 
   addAnchor: (period: DayPeriod) => void
-  updateAnchor: (id: string, patch: { name?: string; note?: string; time?: string; period?: DayPeriod }) => void
+  updateAnchor: (id: string, patch: { name?: string; cue?: string; note?: string; time?: string; period?: DayPeriod }) => void
   removeAnchor: (id: string) => void
   restoreAnchor: (item: TimeAnchor, index: number) => void
+  setAnchorSchedule: (id: string, schedule: HabitSchedule) => void
   toggleAnchorWeekday: (id: string, weekday: number) => void
-  toggleAnchorDone: (id: string, weekday: number) => void
-  resetWeek: (weekKey: string) => void
+  toggleAnchorDone: (id: string, dayKey: string) => void
 
   addExecutionRule: () => void
   updateExecutionRule: (id: string, text: string) => void
@@ -34,7 +34,7 @@ export const createLifeSlice = (initial: LifeState): StateCreator<RootStore, Mut
 
   addAnchor: (period) =>
     set((s) => {
-      s.life.anchors.push({ id: newId(), name: 'لنگر جدید', note: '', time: '', period, activeWeekdays: [], doneWeekdays: [] })
+      s.life.anchors.push({ id: newId(), name: 'لنگر جدید', cue: '', note: '', time: '', period, schedule: { kind: 'daily' }, completions: [] })
     }),
   updateAnchor: (id, patch) =>
     set((s) => {
@@ -49,25 +49,23 @@ export const createLifeSlice = (initial: LifeState): StateCreator<RootStore, Mut
     set((s) => {
       s.life.anchors.splice(Math.min(index, s.life.anchors.length), 0, item)
     }),
+  setAnchorSchedule: (id, schedule) =>
+    set((s) => {
+      const a = s.life.anchors.find((x) => x.id === id)
+      if (a) a.schedule = schedule
+    }),
   toggleAnchorWeekday: (id, weekday) =>
     set((s) => {
       const a = s.life.anchors.find((x) => x.id === id)
-      if (!a) return
-      a.activeWeekdays = a.activeWeekdays.includes(weekday)
-        ? a.activeWeekdays.filter((d) => d !== weekday)
-        : [...a.activeWeekdays, weekday].sort((x, y) => x - y)
-      a.doneWeekdays = a.doneWeekdays.filter((d) => a.activeWeekdays.includes(d))
+      if (!a || a.schedule.kind !== 'weekdays') return
+      const wd = a.schedule.weekdays
+      a.schedule.weekdays = wd.includes(weekday) ? wd.filter((d) => d !== weekday) : [...wd, weekday].sort((x, y) => x - y)
     }),
-  toggleAnchorDone: (id, weekday) =>
+  toggleAnchorDone: (id, dayKey) =>
     set((s) => {
       const a = s.life.anchors.find((x) => x.id === id)
       if (!a) return
-      a.doneWeekdays = a.doneWeekdays.includes(weekday) ? a.doneWeekdays.filter((d) => d !== weekday) : [...a.doneWeekdays, weekday]
-    }),
-  resetWeek: (weekKey) =>
-    set((s) => {
-      for (const a of s.life.anchors) a.doneWeekdays = []
-      s.life.currentWeekKey = weekKey
+      a.completions = a.completions.includes(dayKey) ? a.completions.filter((k) => k !== dayKey) : [...a.completions, dayKey]
     }),
 
   addExecutionRule: () =>

@@ -159,15 +159,24 @@ export interface TradingState {
 
 export type DayPeriod = 'صبح' | 'عصر' | 'شب'
 
+/** زمان‌بندیِ یک عادت: هر روز، روزهای مشخصِ هفته، یا n بار در هفته. */
+export type HabitSchedule =
+  | { kind: 'daily' }
+  | { kind: 'weekdays'; weekdays: number[] } // اندیس روزهای هفته با مبنای شنبه=۰
+  | { kind: 'timesPerWeek'; count: number }
+
+/** یک «لنگر/عادت» — عادتی که با یک نشانه (habit stacking) ساخته و روزانه ردیابی می‌شود. */
 export interface TimeAnchor {
   id: string
   name: string
+  /** لنگر/نشانه (habit stacking): «بعد از [عادتِ موجود]، این را انجام می‌دهم» */
+  cue: string
   note: string
   time: string
   period: DayPeriod
-  /** اندیس روزهای هفته با مبنای شنبه=۰ */
-  activeWeekdays: number[]
-  doneWeekdays: number[]
+  schedule: HabitSchedule
+  /** لاگِ تاریخ‌دارِ انجام؛ کلیدِ روزِ شمسی «YYYY-MM-DD» (مبنای زنجیره/هیت‌مپ/گزارش) */
+  completions: string[]
 }
 
 /** یک کار/تسک ساده با امکان تیک‌زدن (برای بخش «کارها و نوت‌ها») */
@@ -180,8 +189,6 @@ export interface TodoItem {
 export interface LifeState {
   anchors: TimeAnchor[]
   executionRules: TextListItem[]
-  /** شناسهٔ هفتهٔ شمسی جاری (برای تشخیص لزوم ریست هفتگی) */
-  currentWeekKey: string
   /** کارهای قابل‌تیک (جایگزین بخش «مسیر آزادی از بدهی») */
   tasks: TodoItem[]
   /** یادداشت آزاد */
