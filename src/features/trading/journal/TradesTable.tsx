@@ -3,7 +3,7 @@ import { useRootStore } from '../../../store/rootStore'
 import { useSoftDelete } from '../../../lib/useSoftDelete'
 import { hasR, resolveOutcome } from '../lib/tradeOutcome'
 import { accountRiskAmount } from '../lib/tradeMath'
-import { faNumber } from '../../../lib/format/number'
+import { faNumber, faPercent } from '../../../lib/format/number'
 
 const OUTCOME_LABEL: Record<string, string> = { win: 'برد', loss: 'باخت', be: 'سربه‌سر', '': '—' }
 const OUTCOME_STYLE: Record<string, { bg: string; color: string }> = {
@@ -27,6 +27,7 @@ export function TradesTable({ trades }: { trades: Trade[] }) {
   // جدول فقط معاملاتِ حساب فعال را نشان می‌دهد؛ مبلغ ریسکِ همان حساب مبنای R است.
   const accounts = useRootStore((s) => s.trading.accounts)
   const activeId = useRootStore((s) => s.trading.activeAccountId)
+  const balance = accounts.find((a) => a.id === activeId)?.balance ?? 0
   const riskAmount = accountRiskAmount(accounts.find((a) => a.id === activeId) ?? { balance: 0, riskPercent: 0 })
   const riskAmountLabel = riskAmount > 0 ? `$${faNumber(riskAmount, Number.isInteger(riskAmount) ? 0 : 2)}` : '—'
 
@@ -58,8 +59,15 @@ export function TradesTable({ trades }: { trades: Trade[] }) {
                 </td>
                 <td style={{ padding: '10px 12px' }}>
                   {t.riskUsd != null && t.riskUsd > 0 ? (
-                    // ریسکِ واقعیِ ثبت‌شدهٔ همین معامله (مبنای R این معامله).
-                    <span style={{ direction: 'ltr', unicodeBidi: 'isolate', fontWeight: 600 }}>{`$${faNumber(t.riskUsd, Number.isInteger(t.riskUsd) ? 0 : 2)}`}</span>
+                    // ریسکِ واقعیِ همین معامله (مبنای R)؛ اگر موجودی حساب باشد، درصدش هم نشان داده می‌شود.
+                    <span style={{ direction: 'ltr', unicodeBidi: 'isolate', fontWeight: 600 }}>
+                      {`$${faNumber(t.riskUsd, Number.isInteger(t.riskUsd) ? 0 : 2)}`}
+                      {balance > 0 && (
+                        <span style={{ color: t.riskUsd / balance > 0.0105 ? 'var(--accent-red-strong)' : 'var(--text-quiet)', fontWeight: 600 }}>
+                          {' '}({faPercent((t.riskUsd / balance) * 100, 1)})
+                        </span>
+                      )}
+                    </span>
                   ) : t.riskPercent ? (
                     `${t.riskPercent}٪`
                   ) : (

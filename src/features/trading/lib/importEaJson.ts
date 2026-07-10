@@ -2,6 +2,7 @@ import type { TradeDirection } from '../../../types'
 import type { NewTradeInput } from '../../../store/slices/tradingSlice'
 import { faDateShort } from '../../../lib/format/date'
 import { parseMtDate, sanePlannedRR, type Mt5ParseResult, type ParsedTrade } from './importMt5'
+import { riskFromReport } from './tradeRisk'
 
 // وارد کردن معاملات از خروجیِ JSONِ Expert Advisorِ «قطب‌نما» (فایل mt5-ea).
 // مزیتِ این مسیر نسبت به گزارشِ HTML: EA در لحظهٔ ورود، «استاپِ اولیه» و «ریسکِ
@@ -113,7 +114,8 @@ export function parseEaJson(text: string): Mt5ParseResult {
       tp,
       exit,
       profit,
-      riskUsd,
+      // ریسکِ واقعیِ EA اولویت دارد؛ اگر EA آن را نداد، از قیمت‌ها و سود بازسازی می‌کنیم.
+      riskUsd: riskUsd ?? riskFromReport({ entry, stop, exit, profit }),
       r: null, // R نهایی در استور: سود ÷ ریسکِ واقعی (riskUsd) اگر بود
       ticket,
       rr: rr != null ? String(rr) : '',

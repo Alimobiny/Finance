@@ -2,6 +2,7 @@ import type { TradeDirection } from '../../../types'
 import type { NewTradeInput } from '../../../store/slices/tradingSlice'
 import { faDateShort } from '../../../lib/format/date'
 import { computePlannedRR } from './tradeMath'
+import { riskFromReport } from './tradeRisk'
 
 // وارد کردن معاملاتِ بسته‌شده از گزارش HTML متاتریدر ۵ (History → Report).
 // بخش «Positions» را می‌خوانیم که برای هر پوزیشن این ستون‌ها را دارد:
@@ -147,10 +148,9 @@ export function parseMt5Html(html: string): Mt5ParseResult {
       tp,
       exit,
       profit,
-      // R نهایی در استور محاسبه می‌شود. ریسکِ واقعیِ دلاری از گزارشِ HTML قابلِ‌اعتماد
-      // نیست (استاپِ آخر/تریل‌شده)؛ null می‌ماند تا به ریسکِ ثابتِ حساب برگردد. مسیرِ EA
-      // ریسکِ واقعی را مستقیم پر می‌کند.
-      riskUsd: null,
+      // ریسکِ واقعیِ دلاری را از قیمت‌ها و سود بازمی‌سازیم (حجم × فاصلهٔ استاپ، به‌شکلِ
+      // نمادمستقل). دقیق اگر استاپِ گزارش همان استاپِ واقعی باشد؛ وگرنه به ریسکِ حساب برمی‌گردد.
+      riskUsd: riskFromReport({ entry, stop, exit, profit }),
       r: null,
       ticket: ticket || null,
       rr: rr != null ? String(rr) : '',
