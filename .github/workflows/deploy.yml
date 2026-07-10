@@ -4,12 +4,6 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
-  # پوش‌های خودکارِ ورک‌فلوهای به‌روزرسانی با GITHUB_TOKEN، تریگر push را فعال
-  # نمی‌کنند؛ پس بعد از کامل‌شدنشان، دیپلوی را از این مسیر اجرا می‌کنیم تا
-  # prices.json و news.json روی سایت هم بازنشر شوند.
-  workflow_run:
-    workflows: ['Update prices', 'Update news']
-    types: [completed]
 
 permissions:
   contents: read
@@ -35,7 +29,6 @@ jobs:
       - run: npm test
       - run: npm run build
         env:
-          VITE_GOOGLE_CLIENT_ID: ${{ vars.VITE_GOOGLE_CLIENT_ID }}
           VITE_BASE_PATH: /${{ github.event.repository.name }}/
       - uses: actions/upload-pages-artifact@v3
         with:

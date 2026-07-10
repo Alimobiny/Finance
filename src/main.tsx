@@ -16,9 +16,9 @@ import { startLocalPersistence } from './store/persistence'
 import { bootstrapAutoImport } from './features/trading/lib/autoImport'
 
 // اشتراک در تغییرات استور برای ذخیرهٔ خودکار در localStorage (debounce شده).
-// عمداً هیچ همگام‌سازیِ خودکارِ Drive نداریم: بک‌آپ/بازیابی فقط دستی و با تأییدِ
-// کاربر است (نگاه کن به features/settings/DriveBackupPanel) تا داده هرگز بدون
-// اجازه بازنویسی نشود.
+// عمداً هیچ همگام‌سازیِ خودکاری نداریم: بک‌آپ/بازیابی فقط دستی و با تأییدِ کاربر
+// است (نگاه کن به features/settings/GistBackupPanel و BackupPanel) تا داده هرگز
+// بدون اجازه بازنویسی نشود.
 startLocalPersistence(useRootStore)
 // اگر «منبعِ خودکارِ معاملات» تنظیم شده باشد، معاملاتِ جدیدِ متاتریدر را بی‌صدا می‌آورد
 void bootstrapAutoImport()
