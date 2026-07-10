@@ -6,12 +6,14 @@ import { UndoToast } from '../components/ui/UndoToast'
 import { DashboardScreen } from '../features/dashboard/DashboardScreen'
 import { TradingScreen } from '../features/trading/TradingScreen'
 import { LifeScreen } from '../features/life/LifeScreen'
+import { ReportsScreen } from '../features/reports/ReportsScreen'
 import { SettingsScreen } from '../features/settings/SettingsScreen'
 
 const SCREENS: Record<ScreenId, ComponentType> = {
   dashboard: DashboardScreen,
   trading: TradingScreen,
   life: LifeScreen,
+  reports: ReportsScreen,
   settings: SettingsScreen,
 }
 
