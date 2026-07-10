@@ -76,7 +76,17 @@ export function TradesTable({ trades }: { trades: Trade[] }) {
                   )}
                 </td>
                 <td style={{ padding: '10px 12px' }}>{t.rr || '—'}</td>
-                <td style={{ padding: '10px 12px', fontWeight: 800, color: !hasR(t) ? 'var(--text-quiet)' : t.r! > 0 ? 'var(--accent-green)' : t.r! < 0 ? 'var(--accent-red-strong)' : 'var(--text)' }}>
+                <td
+                  title={
+                    t.profit == null
+                      ? undefined
+                      : `سود خالص: ${t.profit}$` +
+                        ((t.commission ?? 0) !== 0 || (t.swap ?? 0) !== 0
+                          ? ` — شاملِ کمیسیون ${t.commission ?? 0}$ و سواپ ${t.swap ?? 0}$`
+                          : '')
+                  }
+                  style={{ padding: '10px 12px', fontWeight: 800, color: !hasR(t) ? 'var(--text-quiet)' : t.r! > 0 ? 'var(--accent-green)' : t.r! < 0 ? 'var(--accent-red-strong)' : 'var(--text)' }}
+                >
                   {!hasR(t) ? '—' : `${t.r! > 0 ? '+' : ''}${t.r}`}
                 </td>
                 <td style={{ padding: '10px 12px', color: t.checklistFollowed ? 'var(--accent-green)' : 'var(--accent-red-strong)', fontWeight: 600 }}>{t.checklistFollowed ? 'بله' : 'خیر'}</td>

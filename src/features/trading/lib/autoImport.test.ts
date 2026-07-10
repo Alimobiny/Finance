@@ -13,9 +13,9 @@ const JSONL =
 describe('fetchAndImport', () => {
   it('معاملاتِ منبع را می‌خواند و به importTrades می‌دهد', async () => {
     mockFetch(true, JSONL)
-    const importTrades = vi.fn(() => ({ added: 1, skipped: 0 }))
+    const importTrades = vi.fn(() => ({ added: 1, updated: 0, skipped: 0 }))
     const res = await fetchAndImport('https://example.test/feed', importTrades)
-    expect(res).toEqual({ added: 1, skipped: 0 })
+    expect(res).toEqual({ added: 1, updated: 0, skipped: 0 })
     expect(importTrades).toHaveBeenCalledOnce()
     // ورودیِ داده‌شده باید ریسکِ واقعیِ EA را داشته باشد
     expect(importTrades.mock.calls[0][0][0].riskUsd).toBe(300)
@@ -28,9 +28,9 @@ describe('fetchAndImport', () => {
 
   it('منبعِ خالی → بدون افزودن و importTrades صدا زده نمی‌شود', async () => {
     mockFetch(true, '   ')
-    const importTrades = vi.fn(() => ({ added: 0, skipped: 0 }))
+    const importTrades = vi.fn(() => ({ added: 0, updated: 0, skipped: 0 }))
     const res = await fetchAndImport('https://example.test/feed', importTrades)
-    expect(res).toEqual({ added: 0, skipped: 0 })
+    expect(res).toEqual({ added: 0, updated: 0, skipped: 0 })
     expect(importTrades).not.toHaveBeenCalled()
   })
 })

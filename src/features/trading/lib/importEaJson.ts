@@ -114,6 +114,8 @@ export function parseEaJson(text: string): Mt5ParseResult {
       tp,
       exit,
       profit,
+      commission: null, // EA فعلاً کمیسیون/سواپ را جدا نمی‌دهد (در سودِ خالص لحاظ است)
+      swap: null,
       // ریسکِ واقعیِ EA اولویت دارد؛ اگر EA آن را نداد، از قیمت‌ها و سود بازسازی می‌کنیم.
       riskUsd: riskUsd ?? riskFromReport({ entry, stop, exit, profit }),
       r: null, // R نهایی در استور: سود ÷ ریسکِ واقعی (riskUsd) اگر بود

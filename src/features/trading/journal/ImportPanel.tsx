@@ -9,7 +9,7 @@ import { fetchAndImport } from '../lib/autoImport'
 type Stage =
   | { kind: 'idle' }
   | { kind: 'parsed'; trades: ParsedTrade[]; skipped: number; fileName: string }
-  | { kind: 'done'; added: number; skipped: number }
+  | { kind: 'done'; added: number; updated: number }
   | { kind: 'error'; msg: string }
 
 const OUTCOME_LABEL: Record<string, string> = { win: 'برد', loss: 'باخت', be: 'سربه‌سر', '': '—' }
@@ -31,10 +31,10 @@ export function ImportPanel() {
     setAutoBusy(true)
     setAutoMsg('')
     try {
-      const { added, skipped } = await fetchAndImport(autoImportUrl, importTrades)
+      const { added, updated } = await fetchAndImport(autoImportUrl, importTrades)
       setAutoMsg(
-        added > 0
-          ? `✓ ${toFa(added)} معاملهٔ جدید اضافه شد${skipped ? ` · ${toFa(skipped)} تکراری رد شد` : ''}.`
+        added > 0 || updated > 0
+          ? `✓ ${toFa(added)} معاملهٔ جدید${updated ? ` · ${toFa(updated)} به‌روزرسانی` : ''}.`
           : 'چیز جدیدی نبود (همهٔ معاملات از قبل ثبت شده‌اند).',
       )
     } catch {
@@ -66,7 +66,7 @@ export function ImportPanel() {
   function confirmImport() {
     if (stage.kind !== 'parsed') return
     const res = importTrades(stage.trades.map((t) => t.input))
-    setStage({ kind: 'done', added: res.added, skipped: res.skipped })
+    setStage({ kind: 'done', added: res.added, updated: res.updated })
   }
 
   return (
@@ -177,7 +177,7 @@ export function ImportPanel() {
 
           {stage.kind === 'done' && (
             <div style={{ marginTop: 12, fontSize: 12.5, color: 'var(--accent-green)', fontWeight: 700 }}>
-              ✓ {toFa(stage.added)} معاملهٔ جدید اضافه شد{stage.skipped > 0 ? ` · ${toFa(stage.skipped)} مورد تکراری بود و رد شد` : ''}.
+              ✓ {toFa(stage.added)} معاملهٔ جدید اضافه شد{stage.updated > 0 ? ` · ${toFa(stage.updated)} معاملهٔ موجود به‌روزرسانی شد (تگ‌ها حفظ شدند)` : ''}.
             </div>
           )}
         </div>

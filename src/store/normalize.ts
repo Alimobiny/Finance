@@ -46,9 +46,13 @@ export function normalizeState(input: RootState): RootState {
     if (typeof t.setup !== 'string') t.setup = ''
     if (typeof t.mistake !== 'string') t.mistake = ''
     if (t.score === undefined) t.score = null
-    // ریسکِ واقعیِ معاملاتِ import‌شدهٔ قدیمی را از گزارش بازسازی کن (اگر ثبت نشده و داده کامل است).
+    if (t.commission === undefined) t.commission = null
+    if (t.swap === undefined) t.swap = null
+    // ریسکِ واقعیِ معاملاتِ import‌شدهٔ قدیمی را از سودِ «ناخالص» (قبل از کمیسیون/سواپ) بازسازی کن،
+    // تا R = سودِ خالص ÷ ریسک، کمیسیون/سواپ را لحاظ کند. (اگر ثبت نشده و داده کامل است.)
     if (t.riskUsd == null && t.profit != null && t.entry != null && t.stop != null && t.exit != null) {
-      const rk = riskFromReport({ entry: t.entry, stop: t.stop, exit: t.exit, profit: t.profit })
+      const gross = t.profit - (t.commission ?? 0) - (t.swap ?? 0)
+      const rk = riskFromReport({ entry: t.entry, stop: t.stop, exit: t.exit, profit: gross })
       if (rk != null) {
         t.riskUsd = rk
         t.r = Math.round((t.profit / rk) * 100) / 100

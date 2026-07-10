@@ -148,9 +148,11 @@ export function parseMt5Html(html: string): Mt5ParseResult {
       tp,
       exit,
       profit,
-      // ریسکِ واقعیِ دلاری را از قیمت‌ها و سود بازمی‌سازیم (حجم × فاصلهٔ استاپ، به‌شکلِ
-      // نمادمستقل). دقیق اگر استاپِ گزارش همان استاپِ واقعی باشد؛ وگرنه به ریسکِ حساب برمی‌گردد.
-      riskUsd: riskFromReport({ entry, stop, exit, profit }),
+      commission,
+      swap,
+      // ریسکِ واقعیِ دلاری را از سودِ «ناخالصِ قیمتی» (ستونِ Profit، قبل از کمیسیون/سواپ)
+      // کالیبره می‌کنیم؛ این‌طور R = سودِ خالص ÷ ریسک، کمیسیون و سواپ را هم لحاظ می‌کند.
+      riskUsd: riskFromReport({ entry, stop, exit, profit: gross }),
       r: null,
       ticket: ticket || null,
       rr: rr != null ? String(rr) : '',

@@ -38,6 +38,8 @@ const EMPTY_FORM: NewTradeInput = {
   tp: null,
   exit: null,
   profit: null,
+  commission: null,
+  swap: null,
   ticket: null,
   rr: '',
   r: null,

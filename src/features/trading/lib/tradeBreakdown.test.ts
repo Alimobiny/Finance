@@ -14,6 +14,8 @@ const t = (over: Partial<Trade>): Trade => ({
   tp: null,
   exit: null,
   profit: null,
+  commission: null,
+  swap: null,
   ticket: null,
   rr: '',
   r: null,

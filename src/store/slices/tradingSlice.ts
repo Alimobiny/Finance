@@ -18,7 +18,7 @@ export interface TradingSlice {
   setActiveAccount: (id: string) => void
 
   addTrade: (input: NewTradeInput) => void
-  importTrades: (inputs: NewTradeInput[]) => { added: number; skipped: number }
+  importTrades: (inputs: NewTradeInput[]) => { added: number; updated: number; skipped: number }
   updateTrade: (id: string, input: NewTradeInput) => void
   removeTrade: (id: string) => void
   startEditTrade: (id: string) => void
@@ -95,30 +95,46 @@ export const createTradingSlice = (
     }),
   importTrades: (inputs) => {
     let added = 0
-    let skipped = 0
+    let updated = 0
     set((s) => {
       const accId = s.trading.activeAccountId
       const acc = s.trading.accounts.find((a) => a.id === accId)
       const risk = acc ? accountRiskAmount(acc) : 0
-      // تکراری‌زدایی فقط داخل همین حساب (شمارهٔ پوزیشن بین حساب‌های مختلف می‌تواند تکرار شود).
-      const seen = new Set(
-        s.trading.trades.filter((t) => t.accountId === accId).map((t) => t.ticket).filter(Boolean) as string[],
-      )
-      // قدیمی→جدید اضافه می‌کنیم و در ابتدای آرایه می‌گذاریم تا در جدول، جدیدترین بالا بماند.
+      // نگاشتِ ticket → معاملهٔ موجودِ همین حساب. import مجدد، فیلدهای مالی/قیمتی را «به‌روز»
+      // می‌کند (نه رد؛ تا کمیسیون/سواپ و R اصلاح شوند) ولی تگ/احساس/امتیاز/یادداشت/عکس را نگه می‌دارد.
+      const byTicket = new Map<string, Trade>()
+      for (const t of s.trading.trades) if (t.accountId === accId && t.ticket) byTicket.set(t.ticket, t)
+      // R از روی سود واقعی ÷ ریسکِ مؤثر (ریسکِ واقعیِ معامله اگر بود، وگرنه ریسکِ ثابتِ حساب).
       for (const input of inputs) {
-        if (input.ticket && seen.has(input.ticket)) {
-          skipped++
-          continue
-        }
-        if (input.ticket) seen.add(input.ticket)
-        // R از روی سود واقعی ÷ ریسکِ مؤثر (ریسکِ واقعیِ معامله اگر بود، وگرنه ریسکِ ثابتِ حساب).
         const r = input.profit != null ? rFromProfit(input.profit, effectiveRiskAmount(input.riskUsd, risk)) : input.r
-        s.trading.trades.unshift({ id: newId(), accountId: accId, ...input, r })
-        added++
+        const existing = input.ticket ? byTicket.get(input.ticket) : undefined
+        if (existing) {
+          existing.date = input.date || existing.date
+          existing.symbol = input.symbol
+          existing.dir = input.dir
+          existing.entry = input.entry
+          existing.stop = input.stop
+          existing.tp = input.tp
+          existing.exit = input.exit
+          existing.profit = input.profit
+          existing.commission = input.commission
+          existing.swap = input.swap
+          existing.riskUsd = input.riskUsd
+          existing.rr = input.rr
+          existing.r = r
+          updated++
+        } else {
+          const nt: Trade = { id: newId(), accountId: accId, ...input, r }
+          s.trading.trades.unshift(nt)
+          if (input.ticket) byTicket.set(input.ticket, nt)
+          added++
+        }
       }
-      if (added > 0) recordChange(s, 'import', 'معاملات', `وارد کردن ${toPersianDigits(added)} معامله از متاتریدر`)
+      if (added > 0 || updated > 0) {
+        recordChange(s, 'import', 'معاملات', `import متاتریدر: ${toPersianDigits(added)} جدید، ${toPersianDigits(updated)} به‌روزرسانی`)
+      }
     })
-    return { added, skipped }
+    return { added, updated, skipped: 0 }
   },
   updateTrade: (id, input) =>
     set((s) => {

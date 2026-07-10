@@ -2,10 +2,11 @@ import { useRootStore } from '../../../store/rootStore'
 import type { NewTradeInput } from '../../../store/slices/tradingSlice'
 import { parseEaJson } from './importEaJson'
 
-type ImportFn = (inputs: NewTradeInput[]) => { added: number; skipped: number }
+type ImportFn = (inputs: NewTradeInput[]) => { added: number; updated: number; skipped: number }
 
 export interface AutoImportResult {
   added: number
+  updated: number
   skipped: number
 }
 
@@ -19,7 +20,7 @@ export async function fetchAndImport(url: string, importTrades: ImportFn): Promi
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   const text = await res.text()
   const { trades } = parseEaJson(text)
-  if (trades.length === 0) return { added: 0, skipped: 0 }
+  if (trades.length === 0) return { added: 0, updated: 0, skipped: 0 }
   return importTrades(trades.map((t) => t.input))
 }
 
