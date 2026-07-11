@@ -144,7 +144,7 @@ export function createDefaultState(): RootState {
         },
       ],
       scoreThreshold: 60,
-      positionSize: { balanceUsd: 0, riskPercent: 0.5, stopUsd: 0 },
+      positionSize: { balanceUsd: 0, riskPercent: 0.5, stopPips: 0, pipValuePerLot: 10 },
     },
     life: {
       anchors: [],

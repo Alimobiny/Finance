@@ -102,7 +102,10 @@ export interface ScoreSection {
 export interface PositionSizeInputs {
   balanceUsd: number
   riskPercent: number
-  stopUsd: number
+  /** فاصلهٔ استاپ به «پیپ» */
+  stopPips: number
+  /** ارزشِ هر پیپ به‌ازای ۱ لات (دلار) — طبق نماد */
+  pipValuePerLot: number
 }
 
 /** یک حساب معاملاتی جدا با ژورنال مستقل خودش */

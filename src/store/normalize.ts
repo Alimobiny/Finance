@@ -61,6 +61,15 @@ export function normalizeState(input: RootState): RootState {
   }
   trading.trades = trades
 
+  // محاسبه‌گرِ حجم: مهاجرت از فرمولِ دلاریِ طلا (stopUsd × ۱۰۰) به پیپ/نماد.
+  const ps = (trading.positionSize ?? {}) as Record<string, unknown>
+  if (typeof ps.balanceUsd !== 'number') ps.balanceUsd = 0
+  if (typeof ps.riskPercent !== 'number') ps.riskPercent = 0.5
+  if (typeof ps.stopPips !== 'number') ps.stopPips = 0
+  if (typeof ps.pipValuePerLot !== 'number') ps.pipValuePerLot = 10
+  delete ps.stopUsd
+  trading.positionSize = ps
+
   // مهاجرتِ امتیازدهی: اگر بخش «وضعیت بازار» (۲۷٫۵ امتیاز، طبق محاسبه‌گر IPS) جا
   // افتاده باشد آن را تزریق می‌کنیم. بدون این بخش، حداکثر امتیاز ۴۷٫۵ می‌ماند و
   // آستانهٔ ۶۰ هرگز دست‌یافتنی نیست (همیشه «وارد نشو»). غیرمخرب و idempotent است.
