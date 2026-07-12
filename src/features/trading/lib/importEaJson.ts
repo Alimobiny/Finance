@@ -21,7 +21,9 @@ interface EaTrade {
   tp?: number
   closeTime?: string
   closePrice?: number
-  profit?: number
+  profit?: number // سودِ خالص (شاملِ کمیسیون و سواپ)
+  commission?: number
+  swap?: number
   riskUsd?: number
 }
 
@@ -114,8 +116,8 @@ export function parseEaJson(text: string): Mt5ParseResult {
       tp,
       exit,
       profit,
-      commission: null, // EA فعلاً کمیسیون/سواپ را جدا نمی‌دهد (در سودِ خالص لحاظ است)
-      swap: null,
+      commission: fin(row.commission) ? round2(row.commission) : null,
+      swap: fin(row.swap) ? round2(row.swap) : null,
       // ریسکِ واقعیِ EA اولویت دارد؛ اگر EA آن را نداد، از قیمت‌ها و سود بازسازی می‌کنیم.
       riskUsd: riskUsd ?? riskFromReport({ entry, stop, exit, profit }),
       r: null, // R نهایی در استور: سود ÷ ریسکِ واقعی (riskUsd) اگر بود

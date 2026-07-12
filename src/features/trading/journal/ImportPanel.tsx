@@ -107,13 +107,15 @@ export function ImportPanel() {
           <div style={{ marginTop: 14, paddingTop: 13, borderTop: '1px dashed var(--border)' }}>
             <div style={{ fontSize: 12.5, fontWeight: 700, marginBottom: 5 }}>یا اتصالِ خودکار (بدون فایل)</div>
             <div style={{ fontSize: 11.5, color: 'var(--text-faint)', lineHeight: 1.7, marginBottom: 9 }}>
-              اگر EA را به یک Google Apps Script وصل کرده‌ای، آدرسِ آن (GET) را این‌جا بگذار. اپ هر بار که باز شود و با دکمهٔ زیر، خودکار معاملاتِ جدید را می‌آورد.
+              <b>توصیه‌شده برای ایران (رایگان و خصوصی):</b> EAِ قطب‌نما را به یک <b>GitHub Gistِ خصوصی</b> وصل کن و این‌جا{' '}
+              <span style={{ direction: 'ltr', unicodeBidi: 'isolate', fontFamily: 'monospace', color: 'var(--accent-navy)' }}>gist:‌شناسهٔ‌گیست/qotbnama-ea.json</span>{' '}
+              بگذار (با همان توکنِ بک‌آپ خوانده می‌شود). یا هر URLِ ساده (GET) که EA به آن می‌نویسد. اپ هر بار باز شدن و با دکمهٔ زیر، خودکار می‌آورد.
             </div>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               <input
                 value={autoImportUrl}
                 onChange={(e) => setAutoImportUrl(e.target.value)}
-                placeholder="https://script.google.com/macros/s/…/exec"
+                placeholder="gist:abc123…/qotbnama-ea.json"
                 style={{ flex: 1, minWidth: 220, border: '1px solid var(--border)', borderRadius: 9, padding: '8px 10px', fontSize: 12, direction: 'ltr', textAlign: 'left', background: 'var(--surface-muted)', outline: 'none' }}
               />
               <button
